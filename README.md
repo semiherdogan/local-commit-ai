@@ -4,6 +4,8 @@ Generate Git commit messages from staged changes in VS Code using your local AI 
 
 Local Commit AI includes presets for Codex CLI and Claude Code CLI, plus a custom provider for any command-line tool that can generate text. The extension runs the selected command on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
 
+![Local Commit AI demo](media/demo.gif)
+
 ## Features
 
 - Adds a **Generate Commit Message** action to the Source Control toolbar.
