@@ -47,12 +47,19 @@ Example settings:
 ```json
 {
   "localCommitAi.provider": "codex",
-  "localCommitAi.model": "",
+  "localCommitAi.model": "gpt-5.4-mini",
   "localCommitAi.buttonIcon": "sparkle",
   "localCommitAi.maxDiffLines": 100,
-  "localCommitAi.prompt": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}"
+  "localCommitAi.prompt": "You are a commit message generator.\n\nReturn exactly one line and nothing else.\n\nRules:\n- Output must be a single conventional commit message\n- Format: type(scope?): description\n- Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test\n- Use lowercase type\n- Keep the description concise\n- Do not use markdown\n- Do not wrap the message in quotes\n- Do not add explanations, alternatives, notes, warnings, or recommendations\n- Do not mention whether the diff is ready to commit\n- If the diff is small or incomplete, still generate the best possible commit message\n\nStaged git diff:\n{diff}"
 }
 ```
+
+Model examples:
+
+| Provider | Model setting |
+| --- | --- |
+| Codex CLI | `gpt-5.4-mini` |
+| Claude Code CLI | `claude-haiku-4-5-20251001` |
 
 ## Packaging
 

@@ -174,9 +174,17 @@ function runCommand(command: string, args: string[], cwd: string, stdin?: string
 }
 
 function sanitizeCommitMessage(message: string): string {
-  return message
+  const cleaned = message
     .trim()
     .replace(/^```(?:\w+)?\s*/, '')
     .replace(/\s*```$/, '')
     .trim();
+
+  const conventionalCommitPattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([^)]+\))?!?: .+/;
+  const lines = cleaned
+    .split(/\r?\n/)
+    .map((line) => line.trim().replace(/^[-*>\s`]+/, '').replace(/`+$/, '').trim());
+  const commitLineIndex = lines.findIndex((line) => conventionalCommitPattern.test(line));
+
+  return commitLineIndex === -1 ? cleaned : lines.slice(commitLineIndex).join('\n').trim();
 }
