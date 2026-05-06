@@ -135,7 +135,8 @@
           "type": "string",
           "enum": [
             "codex",
-            "claude"
+            "claude",
+            "custom"
           ],
           "default": "codex",
           "description": "CLI provider used to generate commit messages."
@@ -161,6 +162,24 @@
           ],
           "default": "sparkle",
           "description": "Icon used for the generate button in the Source Control toolbar."
+        },
+        "localCommitAi.customCommand": {
+          "type": "string",
+          "default": "",
+          "description": "Command used when provider is custom. Example: opencode"
+        },
+        "localCommitAi.customArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Arguments used when provider is custom. Use {prompt} to insert the generated prompt into an argument."
+        },
+        "localCommitAi.customPromptStdin": {
+          "type": "boolean",
+          "default": true,
+          "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
         "localCommitAi.prompt": {
           "type": "string",

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
 
-type Provider = 'codex' | 'claude';
+type Provider = 'codex' | 'claude' | 'custom';
 
 interface GitExtensionApi {
   getAPI(version: 1): GitApi;
@@ -23,6 +23,9 @@ interface GeneratorConfig {
   model: string;
   prompt: string;
   maxDiffLines: number;
+  customCommand: string;
+  customArgs: string[];
+  customPromptStdin: boolean;
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -69,7 +72,7 @@ async function generateCommitMessage() {
         title: 'Generating commit message...'
       },
       async () => {
-        const message = await runGenerator(config.provider, config.model, prompt, repository.rootUri.fsPath);
+        const message = await runGenerator(config, prompt, repository.rootUri.fsPath);
         repository.inputBox.value = sanitizeCommitMessage(message);
       }
     );
@@ -106,7 +109,10 @@ function getConfig(): GeneratorConfig {
     provider,
     model: config.get<string>('model', '').trim(),
     prompt: config.get<string>('prompt', '').trim(),
-    maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100)))
+    maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
+    customCommand: config.get<string>('customCommand', '').trim(),
+    customArgs: config.get<string[]>('customArgs', []),
+    customPromptStdin: config.get<boolean>('customPromptStdin', true)
   };
 }
 
@@ -124,19 +130,35 @@ function limitDiff(diff: string, maxLines: number): string {
   return lines.slice(0, maxLines).join('\n');
 }
 
-function runGenerator(provider: Provider, model: string, prompt: string, cwd: string): Promise<string> {
-  const command = provider;
-  const args = provider === 'codex' ? ['exec'] : ['--print'];
-
-  if (model) {
-    args.push(provider === 'codex' ? '-m' : '--model', model);
+function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
+  if (config.provider === 'custom') {
+    return runCustomGenerator(config, prompt, cwd);
   }
 
-  if (provider === 'codex') {
+  const command = config.provider;
+  const args = config.provider === 'codex' ? ['exec'] : ['--print'];
+
+  if (config.model) {
+    args.push(config.provider === 'codex' ? '-m' : '--model', config.model);
+  }
+
+  if (config.provider === 'codex') {
     args.push('-');
   }
 
   return runCommand(command, args, cwd, prompt);
+}
+
+function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
+  if (!config.customCommand) {
+    throw new Error('Custom provider requires localCommitAi.customCommand.');
+  }
+
+  const argsIncludePrompt = config.customArgs.some((arg) => arg.includes('{prompt}'));
+  const args = config.customArgs.map((arg) => arg.replaceAll('{prompt}', prompt));
+  const stdin = config.customPromptStdin && !argsIncludePrompt ? prompt : undefined;
+
+  return runCommand(config.customCommand, args, cwd, stdin);
 }
 
 function runCommand(command: string, args: string[], cwd: string, stdin?: string): Promise<string> {
