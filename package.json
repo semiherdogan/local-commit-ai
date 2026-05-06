@@ -1,0 +1,83 @@
+{
+  "name": "commit-message-generator",
+  "displayName": "Commit Message Generator",
+  "description": "Generate commit messages from staged git diffs using Codex or Claude CLI.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "packageManager": "npm@11.12.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Source Control"
+  ],
+  "activationEvents": [
+    "onCommand:commitMessageGenerator.generate"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.7.2"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "commitMessageGenerator.generate",
+        "title": "Generate Commit Button",
+        "category": "Commit Message Generator",
+        "icon": "$(robot)"
+      }
+    ],
+    "menus": {
+      "scm/inputBox": [
+        {
+          "command": "commitMessageGenerator.generate",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "commitMessageGenerator.generate",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Commit Message Generator",
+      "properties": {
+        "commitMessageGenerator.provider": {
+          "type": "string",
+          "enum": [
+            "codex",
+            "claude"
+          ],
+          "default": "codex",
+          "description": "CLI provider used to generate commit messages."
+        },
+        "commitMessageGenerator.model": {
+          "type": "string",
+          "default": "",
+          "description": "Optional model name passed to the selected CLI."
+        },
+        "commitMessageGenerator.prompt": {
+          "type": "string",
+          "default": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}",
+          "description": "Prompt template. Use {diff} where the staged git diff should be inserted."
+        },
+        "commitMessageGenerator.maxDiffLines": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
+        }
+      }
+    }
+  }
+}
