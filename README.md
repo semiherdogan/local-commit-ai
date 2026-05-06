@@ -132,14 +132,6 @@ Install the generated package locally:
 code --install-extension local-commit-ai-0.0.1.vsix
 ```
 
-## Release Artifacts
-
-GitHub Actions creates a release and uploads the VSIX package when a version tag is pushed.
-
-```sh
-git tag v0.0.1
-git push origin v0.0.1
-```
 
 ## License
 
