@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
 
+const outputChannel = vscode.window.createOutputChannel('Local Commit AI');
+
 type Provider = 'codex' | 'claude' | 'custom';
 
 interface GitExtensionApi {
@@ -23,6 +25,7 @@ interface GeneratorConfig {
   model: string;
   prompt: string;
   maxDiffLines: number;
+  debug: boolean;
   customCommand: string;
   customArgs: string[];
   customPromptStdin: boolean;
@@ -38,6 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
   ];
 
   context.subscriptions.push(
+    outputChannel,
     ...commands.map((command) => vscode.commands.registerCommand(command, generateCommitMessage))
   );
 }
@@ -62,6 +66,13 @@ async function generateCommitMessage() {
 
     const config = getConfig();
     const limitedDiff = limitDiff(diff, config.maxDiffLines);
+
+    debugLog(config, 'Starting generation');
+    debugLog(config, `Repository: ${repository.rootUri.fsPath}`);
+    debugLog(config, `Provider: ${config.provider}`);
+    debugLog(config, `Diff lines: ${countLines(diff)}`);
+    debugLog(config, `Prompt diff lines: ${countLines(limitedDiff)}`);
+
     const prompt = config.prompt.includes('{diff}')
       ? config.prompt.replaceAll('{diff}', limitedDiff)
       : `${config.prompt.trim()}\n\nDiff:\n${limitedDiff}`;
@@ -73,7 +84,13 @@ async function generateCommitMessage() {
       },
       async () => {
         const message = await runGenerator(config, prompt, repository.rootUri.fsPath);
-        repository.inputBox.value = sanitizeCommitMessage(message);
+        const sanitizedMessage = sanitizeCommitMessage(message);
+
+        debugLog(config, `Raw output length: ${message.length}`);
+        debugLog(config, `Sanitized output length: ${sanitizedMessage.length}`);
+        debugLog(config, `Generated message: ${sanitizedMessage}`);
+
+        repository.inputBox.value = sanitizedMessage;
       }
     );
   } catch (error) {
@@ -110,10 +127,23 @@ function getConfig(): GeneratorConfig {
     model: config.get<string>('model', '').trim(),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
+    debug: config.get<boolean>('debug', false),
     customCommand: config.get<string>('customCommand', '').trim(),
     customArgs: config.get<string[]>('customArgs', []),
     customPromptStdin: config.get<boolean>('customPromptStdin', true)
   };
+}
+
+function countLines(value: string): number {
+  return value ? value.split(/\r?\n/).length : 0;
+}
+
+function debugLog(config: GeneratorConfig, message: string) {
+  if (!config.debug) {
+    return;
+  }
+
+  outputChannel.appendLine(`[${new Date().toISOString()}] ${message}`);
 }
 
 function limitDiff(diff: string, maxLines: number): string {
@@ -146,7 +176,11 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Pro
     args.push('-');
   }
 
-  return runCommand(command, args, cwd, prompt);
+  debugLog(config, `Command: ${command}`);
+  debugLog(config, `Args: ${JSON.stringify(args)}`);
+  debugLog(config, 'Prompt source: stdin');
+
+  return runCommand(command, args, cwd, prompt, config);
 }
 
 function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
@@ -158,11 +192,16 @@ function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string
   const args = config.customArgs.map((arg) => arg.replaceAll('{prompt}', prompt));
   const stdin = config.customPromptStdin && !argsIncludePrompt ? prompt : undefined;
 
-  return runCommand(config.customCommand, args, cwd, stdin);
+  debugLog(config, `Command: ${config.customCommand}`);
+  debugLog(config, `Args template: ${JSON.stringify(config.customArgs)}`);
+  debugLog(config, `Prompt source: ${stdin === undefined ? 'args' : 'stdin'}`);
+
+  return runCommand(config.customCommand, args, cwd, stdin, config);
 }
 
-function runCommand(command: string, args: string[], cwd: string, stdin?: string): Promise<string> {
+function runCommand(command: string, args: string[], cwd: string, stdin?: string, config?: GeneratorConfig): Promise<string> {
   return new Promise((resolve, reject) => {
+    const startedAt = Date.now();
     const child = spawn(command, args, { cwd });
     let stdout = '';
     let stderr = '';
@@ -179,10 +218,23 @@ function runCommand(command: string, args: string[], cwd: string, stdin?: string
     });
 
     child.on('error', (error) => {
+      if (config) {
+        debugLog(config, `Command error: ${error.message}`);
+      }
+
       reject(error);
     });
 
     child.on('close', (code) => {
+      if (config) {
+        debugLog(config, `Exit code: ${code}`);
+        debugLog(config, `Duration: ${Date.now() - startedAt}ms`);
+
+        if (stderr.trim()) {
+          debugLog(config, `Stderr: ${truncateForLog(stderr.trim())}`);
+        }
+      }
+
       if (code === 0) {
         resolve(stdout);
         return;
@@ -193,6 +245,10 @@ function runCommand(command: string, args: string[], cwd: string, stdin?: string
 
     child.stdin.end(stdin);
   });
+}
+
+function truncateForLog(value: string): string {
+  return value.length > 1000 ? `${value.slice(0, 1000)}...` : value;
 }
 
 function sanitizeCommitMessage(message: string): string {

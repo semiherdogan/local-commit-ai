@@ -186,6 +186,11 @@
           "default": 100,
           "minimum": 0,
           "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
+        },
+        "localCommitAi.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Write generation diagnostics to the Local Commit AI output channel."
         }
       }
     }

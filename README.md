@@ -64,6 +64,7 @@ The extension only uses staged changes. Stage files before generating a commit m
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
 | `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
+| `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI** output channel. |
 
 Example settings:
 
@@ -105,6 +106,12 @@ If your CLI reads from stdin, omit `{prompt}` from `customArgs` and leave `custo
   "localCommitAi.customPromptStdin": true
 }
 ```
+
+## Debugging
+
+Enable `localCommitAi.debug` to inspect generation diagnostics in the **Local Commit AI** output channel.
+
+The debug log includes provider, command, argument template, prompt source, diff line counts, duration, exit code, stderr preview, and the generated message. It does not log the full prompt or diff content.
 
 ## Packaging
 
