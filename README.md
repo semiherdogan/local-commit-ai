@@ -17,6 +17,23 @@ Local Commit AI includes presets for Codex CLI and Claude Code CLI, plus a custo
 - Limits the number of diff lines sent to the CLI to keep generation fast and predictable.
 - Lets you choose the toolbar icon from a small set of built-in VS Code icons.
 
+## Installation
+
+Download the latest VSIX file from [GitHub Releases](https://github.com/semiherdogan/local-commit-ai/releases).
+
+Then install it in VS Code:
+
+1. Open the Extensions view.
+2. Open the `...` menu in the top-right corner.
+3. Select **Install from VSIX...**.
+4. Choose the downloaded `local-commit-ai-*.vsix` file.
+
+You can also install it from the command line:
+
+```sh
+code --install-extension local-commit-ai-*.vsix
+```
+
 ## Requirements
 
 Install at least one supported CLI and make sure it is available on `PATH`:
