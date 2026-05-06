@@ -80,15 +80,14 @@ Install the generated package locally:
 code --install-extension local-commit-ai-0.0.1.vsix
 ```
 
-## Publishing
+## Release Artifacts
 
-The extension can be packaged with `@vscode/vsce`:
+GitHub Actions creates a release and uploads the VSIX package when a version tag is pushed.
 
 ```sh
-npm run package
+git tag v0.0.1
+git push origin v0.0.1
 ```
-
-If you publish to Open VSX, use the same VSIX package or the Open VSX publishing flow for your namespace.
 
 ## License
 
