@@ -1,20 +1,20 @@
 {
-  "name": "commit-message-generator",
-  "displayName": "Commit Message Generator",
-  "description": "Generate commit messages from staged git diffs using Codex or Claude CLI.",
+  "name": "local-commit-ai",
+  "displayName": "Local Commit AI",
+  "description": "Generate Git commit messages with your local Codex, Claude, or other AI CLI.",
   "version": "0.0.1",
-  "publisher": "semih",
+  "publisher": "semiherdogan",
   "packageManager": "npm@11.12.1",
   "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/semih/commit-message-generator.git"
+    "url": "https://github.com/semiherdogan/local-commit-ai.git"
   },
   "bugs": {
-    "url": "https://github.com/semih/commit-message-generator/issues"
+    "url": "https://github.com/semiherdogan/local-commit-ai/issues"
   },
-  "homepage": "https://github.com/semih/commit-message-generator#readme",
+  "homepage": "https://github.com/semiherdogan/local-commit-ai#readme",
   "keywords": [
     "commit",
     "commit-message",
@@ -31,11 +31,11 @@
     "Source Control"
   ],
   "activationEvents": [
-    "onCommand:commitMessageGenerator.generate",
-    "onCommand:commitMessageGenerator.generate.sparkle",
-    "onCommand:commitMessageGenerator.generate.hubot",
-    "onCommand:commitMessageGenerator.generate.gitCommit",
-    "onCommand:commitMessageGenerator.generate.commentAdd"
+    "onCommand:localCommitAi.generate",
+    "onCommand:localCommitAi.generate.sparkle",
+    "onCommand:localCommitAi.generate.hubot",
+    "onCommand:localCommitAi.generate.gitCommit",
+    "onCommand:localCommitAi.generate.commentAdd"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -53,85 +53,85 @@
   "contributes": {
     "commands": [
       {
-        "command": "commitMessageGenerator.generate",
+        "command": "localCommitAi.generate",
         "title": "Generate Commit Message",
-        "category": "Commit Message Generator",
+        "category": "Local Commit AI",
         "icon": "$(sparkle)"
       },
       {
-        "command": "commitMessageGenerator.generate.sparkle",
+        "command": "localCommitAi.generate.sparkle",
         "title": "Generate Commit Message",
-        "category": "Commit Message Generator",
+        "category": "Local Commit AI",
         "icon": "$(sparkle)"
       },
       {
-        "command": "commitMessageGenerator.generate.hubot",
+        "command": "localCommitAi.generate.hubot",
         "title": "Generate Commit Message",
-        "category": "Commit Message Generator",
+        "category": "Local Commit AI",
         "icon": "$(hubot)"
       },
       {
-        "command": "commitMessageGenerator.generate.gitCommit",
+        "command": "localCommitAi.generate.gitCommit",
         "title": "Generate Commit Message",
-        "category": "Commit Message Generator",
+        "category": "Local Commit AI",
         "icon": "$(git-commit)"
       },
       {
-        "command": "commitMessageGenerator.generate.commentAdd",
+        "command": "localCommitAi.generate.commentAdd",
         "title": "Generate Commit Message",
-        "category": "Commit Message Generator",
+        "category": "Local Commit AI",
         "icon": "$(comment-add)"
       }
     ],
     "menus": {
       "scm/title": [
         {
-          "command": "commitMessageGenerator.generate.sparkle",
-          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'sparkle'",
+          "command": "localCommitAi.generate.sparkle",
+          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'sparkle'",
           "group": "navigation@1"
         },
         {
-          "command": "commitMessageGenerator.generate.hubot",
-          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'hubot'",
+          "command": "localCommitAi.generate.hubot",
+          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'hubot'",
           "group": "navigation@1"
         },
         {
-          "command": "commitMessageGenerator.generate.gitCommit",
-          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'gitCommit'",
+          "command": "localCommitAi.generate.gitCommit",
+          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'gitCommit'",
           "group": "navigation@1"
         },
         {
-          "command": "commitMessageGenerator.generate.commentAdd",
-          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'commentAdd'",
+          "command": "localCommitAi.generate.commentAdd",
+          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'commentAdd'",
           "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
-          "command": "commitMessageGenerator.generate"
+          "command": "localCommitAi.generate"
         },
         {
-          "command": "commitMessageGenerator.generate.sparkle",
+          "command": "localCommitAi.generate.sparkle",
           "when": "false"
         },
         {
-          "command": "commitMessageGenerator.generate.hubot",
+          "command": "localCommitAi.generate.hubot",
           "when": "false"
         },
         {
-          "command": "commitMessageGenerator.generate.gitCommit",
+          "command": "localCommitAi.generate.gitCommit",
           "when": "false"
         },
         {
-          "command": "commitMessageGenerator.generate.commentAdd",
+          "command": "localCommitAi.generate.commentAdd",
           "when": "false"
         }
       ]
     },
     "configuration": {
-      "title": "Commit Message Generator",
+      "title": "Local Commit AI",
       "properties": {
-        "commitMessageGenerator.provider": {
+        "localCommitAi.provider": {
           "type": "string",
           "enum": [
             "codex",
@@ -140,12 +140,12 @@
           "default": "codex",
           "description": "CLI provider used to generate commit messages."
         },
-        "commitMessageGenerator.model": {
+        "localCommitAi.model": {
           "type": "string",
           "default": "",
           "description": "Optional model name passed to the selected CLI."
         },
-        "commitMessageGenerator.buttonIcon": {
+        "localCommitAi.buttonIcon": {
           "type": "string",
           "enum": [
             "sparkle",
@@ -162,13 +162,13 @@
           "default": "sparkle",
           "description": "Icon used for the generate button in the Source Control toolbar."
         },
-        "commitMessageGenerator.prompt": {
+        "localCommitAi.prompt": {
           "type": "string",
           "editPresentation": "multilineText",
           "default": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}",
           "description": "Prompt template. Use {diff} where the staged git diff should be inserted."
         },
-        "commitMessageGenerator.maxDiffLines": {
+        "localCommitAi.maxDiffLines": {
           "type": "number",
           "default": 100,
           "minimum": 0,

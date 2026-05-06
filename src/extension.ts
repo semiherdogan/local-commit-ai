@@ -27,11 +27,11 @@ interface GeneratorConfig {
 
 export function activate(context: vscode.ExtensionContext) {
   const commands = [
-    'commitMessageGenerator.generate',
-    'commitMessageGenerator.generate.sparkle',
-    'commitMessageGenerator.generate.hubot',
-    'commitMessageGenerator.generate.gitCommit',
-    'commitMessageGenerator.generate.commentAdd'
+    'localCommitAi.generate',
+    'localCommitAi.generate.sparkle',
+    'localCommitAi.generate.hubot',
+    'localCommitAi.generate.gitCommit',
+    'localCommitAi.generate.commentAdd'
   ];
 
   context.subscriptions.push(
@@ -99,7 +99,7 @@ async function getRepository(): Promise<GitRepository | undefined> {
 }
 
 function getConfig(): GeneratorConfig {
-  const config = vscode.workspace.getConfiguration('commitMessageGenerator');
+  const config = vscode.workspace.getConfiguration('localCommitAi');
   const provider = config.get<Provider>('provider', 'codex');
 
   return {

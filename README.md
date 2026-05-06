@@ -1,6 +1,8 @@
-# Commit Message Generator
+# Local Commit AI
 
-Generate a commit message for staged Git changes from the VS Code Source Control view using Codex CLI or Claude Code CLI.
+Generate Git commit messages from staged changes in VS Code using your local AI CLI.
+
+Local Commit AI currently supports Codex CLI and Claude Code CLI. The extension runs the selected CLI on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
 
 ## Features
 
@@ -11,6 +13,7 @@ Generate a commit message for staged Git changes from the VS Code Source Control
 - Supports a customizable prompt template with `{diff}` replacement.
 - Supports optional model names for both providers.
 - Limits the number of diff lines sent to the CLI to keep generation fast and predictable.
+- Lets you choose the toolbar icon from a small set of built-in VS Code icons.
 
 ## Requirements
 
@@ -33,21 +36,21 @@ The extension only uses staged changes. Stage files before generating a commit m
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `commitMessageGenerator.provider` | `codex` | CLI provider. Supported values: `codex`, `claude`. |
-| `commitMessageGenerator.model` | `""` | Optional model name passed to the selected CLI. |
-| `commitMessageGenerator.buttonIcon` | `sparkle` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
-| `commitMessageGenerator.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
-| `commitMessageGenerator.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
+| `localCommitAi.provider` | `codex` | CLI provider. Supported values: `codex`, `claude`. |
+| `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
+| `localCommitAi.buttonIcon` | `sparkle` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
+| `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
+| `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
 
 Example settings:
 
 ```json
 {
-  "commitMessageGenerator.provider": "codex",
-  "commitMessageGenerator.model": "",
-  "commitMessageGenerator.buttonIcon": "sparkle",
-  "commitMessageGenerator.maxDiffLines": 100,
-  "commitMessageGenerator.prompt": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}"
+  "localCommitAi.provider": "codex",
+  "localCommitAi.model": "",
+  "localCommitAi.buttonIcon": "sparkle",
+  "localCommitAi.maxDiffLines": 100,
+  "localCommitAi.prompt": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}"
 }
 ```
 
@@ -74,19 +77,18 @@ npm run package
 Install the generated package locally:
 
 ```sh
-code --install-extension commit-message-generator-0.0.1.vsix
+code --install-extension local-commit-ai-0.0.1.vsix
 ```
 
 ## Publishing
 
-Before publishing, update these fields in `package.json` if they do not match your publisher or repository:
+The extension can be packaged with `@vscode/vsce`:
 
-- `publisher`
-- `repository.url`
-- `bugs.url`
-- `homepage`
+```sh
+npm run package
+```
 
-The extension can be packaged with `@vscode/vsce`. If you publish to Open VSX, use the same VSIX package or the Open VSX publishing flow for your namespace.
+If you publish to Open VSX, use the same VSIX package or the Open VSX publishing flow for your namespace.
 
 ## License
 
