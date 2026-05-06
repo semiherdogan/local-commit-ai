@@ -154,7 +154,7 @@
             "Git commit icon.",
             "Comment add icon."
           ],
-          "default": "sparkle",
+          "default": "hubot",
           "description": "Icon used for the generate button in the Source Control toolbar."
         },
         "localCommitAi.customCommand": {

@@ -58,7 +58,7 @@ The extension only uses staged changes. Stage files before generating a commit m
 | --- | --- | --- |
 | `localCommitAi.provider` | `codex` | CLI provider. Supported values: `codex`, `claude`, `custom`. |
 | `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
-| `localCommitAi.buttonIcon` | `sparkle` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
+| `localCommitAi.buttonIcon` | `hubot` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
 | `localCommitAi.customCommand` | `""` | Command used when `provider` is `custom`. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
@@ -72,7 +72,7 @@ Example settings:
 {
   "localCommitAi.provider": "codex",
   "localCommitAi.model": "gpt-5.4-mini",
-  "localCommitAi.buttonIcon": "sparkle",
+  "localCommitAi.buttonIcon": "hubot",
   "localCommitAi.maxDiffLines": 100,
   "localCommitAi.prompt": "You are a commit message generator.\n\nReturn exactly one line and nothing else.\n\nRules:\n- Output must be a single conventional commit message\n- Format: type(scope?): description\n- Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test\n- Use lowercase type\n- Keep the description concise\n- Do not use markdown\n- Do not wrap the message in quotes\n- Do not add explanations, alternatives, notes, warnings, or recommendations\n- Do not mention whether the diff is ready to commit\n- If the diff is small or incomplete, still generate the best possible commit message\n\nStaged git diff:\n{diff}"
 }
