@@ -5,6 +5,11 @@
   "version": "0.0.1",
   "publisher": "local",
   "packageManager": "npm@11.12.1",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "file:///Users/semih/Desktop/commit-message-generator"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -18,11 +23,13 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "vscode:prepublish": "npm run compile"
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/vscode": "^1.95.0",
+    "@vscode/vsce": "^3.9.1",
     "typescript": "^5.7.2"
   },
   "contributes": {
@@ -31,21 +38,20 @@
         "command": "commitMessageGenerator.generate",
         "title": "Generate Commit Button",
         "category": "Commit Message Generator",
-        "icon": "$(robot)"
+        "icon": "$(sparkle)"
       }
     ],
     "menus": {
-      "scm/inputBox": [
+      "scm/title": [
         {
           "command": "commitMessageGenerator.generate",
           "when": "scmProvider == git",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
-          "command": "commitMessageGenerator.generate",
-          "when": "scmProvider == git"
+          "command": "commitMessageGenerator.generate"
         }
       ]
     },
@@ -68,6 +74,7 @@
         },
         "commitMessageGenerator.prompt": {
           "type": "string",
+          "editPresentation": "multilineText",
           "default": "Generate a conventional commit message for this staged git diff.\n\nRequirements:\n- Use conventional commit format: type(scope?): description\n- Be concise\n- Infer the most appropriate type\n- Output only the commit message\n\nDiff:\n{diff}",
           "description": "Prompt template. Use {diff} where the staged git diff should be inserted."
         },
