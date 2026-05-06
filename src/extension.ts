@@ -49,10 +49,16 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 async function generateCommitMessage() {
+  const config = getConfig();
+  beginDebugSession(config);
+
   try {
+    debugLog(config, 'Generate command invoked');
+
     const repository = await getRepository();
 
     if (!repository) {
+      debugLog(config, 'No Git repository found');
       vscode.window.showWarningMessage('No Git repository found.');
       return;
     }
@@ -60,11 +66,11 @@ async function generateCommitMessage() {
     const diff = await runCommand('git', ['diff', '--cached'], repository.rootUri.fsPath);
 
     if (!diff.trim()) {
+      debugLog(config, 'No staged changes found');
       vscode.window.showWarningMessage('No staged changes to generate a commit message.');
       return;
     }
 
-    const config = getConfig();
     const limitedDiff = limitDiff(diff, config.maxDiffLines);
 
     debugLog(config, 'Starting generation');
@@ -95,6 +101,7 @@ async function generateCommitMessage() {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    debugLog(config, `Generation failed: ${message}`);
     vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
   }
 }
@@ -136,6 +143,16 @@ function getConfig(): GeneratorConfig {
 
 function countLines(value: string): number {
   return value ? value.split(/\r?\n/).length : 0;
+}
+
+function beginDebugSession(config: GeneratorConfig) {
+  if (!config.debug) {
+    return;
+  }
+
+  outputChannel.show(true);
+  outputChannel.appendLine('');
+  outputChannel.appendLine('--- Local Commit AI ---');
 }
 
 function debugLog(config: GeneratorConfig, message: string) {
