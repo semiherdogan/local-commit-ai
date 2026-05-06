@@ -28,14 +28,8 @@
     "vscode": "^1.95.0"
   },
   "categories": [
-    "Source Control"
-  ],
-  "activationEvents": [
-    "onCommand:localCommitAi.generate",
-    "onCommand:localCommitAi.generate.sparkle",
-    "onCommand:localCommitAi.generate.hubot",
-    "onCommand:localCommitAi.generate.gitCommit",
-    "onCommand:localCommitAi.generate.commentAdd"
+    "AI",
+    "SCM Providers"
   ],
   "main": "./out/extension.js",
   "scripts": {
