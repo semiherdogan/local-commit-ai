@@ -26,8 +26,16 @@ interface GeneratorConfig {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  const commands = [
+    'commitMessageGenerator.generate',
+    'commitMessageGenerator.generate.sparkle',
+    'commitMessageGenerator.generate.hubot',
+    'commitMessageGenerator.generate.gitCommit',
+    'commitMessageGenerator.generate.commentAdd'
+  ];
+
   context.subscriptions.push(
-    vscode.commands.registerCommand('commitMessageGenerator.generate', generateCommitMessage)
+    ...commands.map((command) => vscode.commands.registerCommand(command, generateCommitMessage))
   );
 }
 

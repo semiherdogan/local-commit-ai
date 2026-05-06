@@ -3,13 +3,27 @@
   "displayName": "Commit Message Generator",
   "description": "Generate commit messages from staged git diffs using Codex or Claude CLI.",
   "version": "0.0.1",
-  "publisher": "local",
+  "publisher": "semih",
   "packageManager": "npm@11.12.1",
   "icon": "media/icon.png",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "file:///Users/semih/Desktop/commit-message-generator"
+    "url": "https://github.com/semih/commit-message-generator.git"
   },
+  "bugs": {
+    "url": "https://github.com/semih/commit-message-generator/issues"
+  },
+  "homepage": "https://github.com/semih/commit-message-generator#readme",
+  "keywords": [
+    "commit",
+    "commit-message",
+    "git",
+    "source-control",
+    "codex",
+    "claude",
+    "conventional-commits"
+  ],
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -17,7 +31,11 @@
     "Source Control"
   ],
   "activationEvents": [
-    "onCommand:commitMessageGenerator.generate"
+    "onCommand:commitMessageGenerator.generate",
+    "onCommand:commitMessageGenerator.generate.sparkle",
+    "onCommand:commitMessageGenerator.generate.hubot",
+    "onCommand:commitMessageGenerator.generate.gitCommit",
+    "onCommand:commitMessageGenerator.generate.commentAdd"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -36,22 +54,77 @@
     "commands": [
       {
         "command": "commitMessageGenerator.generate",
-        "title": "Generate Commit Button",
+        "title": "Generate Commit Message",
         "category": "Commit Message Generator",
         "icon": "$(sparkle)"
+      },
+      {
+        "command": "commitMessageGenerator.generate.sparkle",
+        "title": "Generate Commit Message",
+        "category": "Commit Message Generator",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "commitMessageGenerator.generate.hubot",
+        "title": "Generate Commit Message",
+        "category": "Commit Message Generator",
+        "icon": "$(hubot)"
+      },
+      {
+        "command": "commitMessageGenerator.generate.gitCommit",
+        "title": "Generate Commit Message",
+        "category": "Commit Message Generator",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "commitMessageGenerator.generate.commentAdd",
+        "title": "Generate Commit Message",
+        "category": "Commit Message Generator",
+        "icon": "$(comment-add)"
       }
     ],
     "menus": {
       "scm/title": [
         {
-          "command": "commitMessageGenerator.generate",
-          "when": "scmProvider == git",
+          "command": "commitMessageGenerator.generate.sparkle",
+          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'sparkle'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "commitMessageGenerator.generate.hubot",
+          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'hubot'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "commitMessageGenerator.generate.gitCommit",
+          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'gitCommit'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "commitMessageGenerator.generate.commentAdd",
+          "when": "scmProvider == git && config.commitMessageGenerator.buttonIcon == 'commentAdd'",
           "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
           "command": "commitMessageGenerator.generate"
+        },
+        {
+          "command": "commitMessageGenerator.generate.sparkle",
+          "when": "false"
+        },
+        {
+          "command": "commitMessageGenerator.generate.hubot",
+          "when": "false"
+        },
+        {
+          "command": "commitMessageGenerator.generate.gitCommit",
+          "when": "false"
+        },
+        {
+          "command": "commitMessageGenerator.generate.commentAdd",
+          "when": "false"
         }
       ]
     },
@@ -71,6 +144,23 @@
           "type": "string",
           "default": "",
           "description": "Optional model name passed to the selected CLI."
+        },
+        "commitMessageGenerator.buttonIcon": {
+          "type": "string",
+          "enum": [
+            "sparkle",
+            "hubot",
+            "gitCommit",
+            "commentAdd"
+          ],
+          "enumDescriptions": [
+            "Sparkle icon.",
+            "Hubot icon.",
+            "Git commit icon.",
+            "Comment add icon."
+          ],
+          "default": "sparkle",
+          "description": "Icon used for the generate button in the Source Control toolbar."
         },
         "commitMessageGenerator.prompt": {
           "type": "string",
