@@ -1,10 +1,10 @@
-# Local Commit AI
+# Local Commit AI CLI
 
 Generate Git commit messages from staged changes in VS Code using your local AI CLI.
 
-Local Commit AI includes presets for Codex CLI and Claude Code CLI, plus a custom provider for any command-line tool that can generate text. The extension runs the selected command on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
+Local Commit AI CLI includes presets for Codex CLI and Claude Code CLI, plus a custom provider for any command-line tool that can generate text. The extension runs the selected command on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
 
-![Local Commit AI demo](https://raw.githubusercontent.com/semiherdogan/local-commit-ai/main/media/demo.gif)
+![Local Commit AI CLI demo](https://raw.githubusercontent.com/semiherdogan/local-commit-ai/main/media/demo.gif)
 
 ## Features
 
@@ -21,7 +21,7 @@ Local Commit AI includes presets for Codex CLI and Claude Code CLI, plus a custo
 
 Install from:
 
-- [Open VSX Registry](https://open-vsx.org/extension/semiherdogan/local-commit-ai)
+- [Open VSX Registry](https://open-vsx.org/extension/semiherdogan/local-commit-ai-cli)
 - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=semiherdogan.local-commit-ai-cli)
 
 Download the latest VSIX file from [GitHub Releases](https://github.com/semiherdogan/local-commit-ai/releases).
@@ -31,12 +31,12 @@ Then install it in VS Code:
 1. Open the Extensions view.
 2. Open the `...` menu in the top-right corner.
 3. Select **Install from VSIX...**.
-4. Choose the downloaded `local-commit-ai-*.vsix` file.
+4. Choose the downloaded `local-commit-ai-cli-*.vsix` file.
 
 You can also install it from the command line:
 
 ```sh
-code --install-extension local-commit-ai-*.vsix
+code --install-extension local-commit-ai-cli-*.vsix
 ```
 
 ## Requirements
@@ -69,7 +69,7 @@ The extension only uses staged changes. Stage files before generating a commit m
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
 | `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
-| `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI** output channel. |
+| `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
 
 Example settings:
 
@@ -114,7 +114,7 @@ If your CLI reads from stdin, omit `{prompt}` from `customArgs` and leave `custo
 
 ## Debugging
 
-Enable `localCommitAi.debug` to inspect generation diagnostics in the **Local Commit AI** output channel.
+Enable `localCommitAi.debug` to inspect generation diagnostics in the **Local Commit AI CLI** output channel.
 
 The debug log includes provider, command, argument template, prompt source, diff line counts, duration, exit code, stderr preview, and the generated message. It does not log the full prompt or diff content.
 
@@ -144,16 +144,10 @@ Create a VSIX package:
 npm run package
 ```
 
-Create a VS Code Marketplace package:
-
-```sh
-npm run build:marketplace
-```
-
 Install the generated package locally:
 
 ```sh
-code --install-extension local-commit-ai-0.0.1.vsix
+code --install-extension local-commit-ai-cli-0.0.1.vsix
 ```
 
 

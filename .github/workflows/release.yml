@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   release:
     name: Build and release VSIX
@@ -53,4 +56,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            local-commit-ai-*.vsix
+            local-commit-ai-cli-*.vsix

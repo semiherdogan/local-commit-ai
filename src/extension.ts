@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
 
-const outputChannel = vscode.window.createOutputChannel('Local Commit AI');
+const outputChannel = vscode.window.createOutputChannel('Local Commit AI CLI');
 
 type Provider = 'codex' | 'claude' | 'custom';
 
@@ -152,7 +152,7 @@ function beginDebugSession(config: GeneratorConfig) {
 
   outputChannel.show(true);
   outputChannel.appendLine('');
-  outputChannel.appendLine('--- Local Commit AI ---');
+  outputChannel.appendLine('--- Local Commit AI CLI ---');
 }
 
 function debugLog(config: GeneratorConfig, message: string) {

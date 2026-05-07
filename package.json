@@ -1,6 +1,6 @@
 {
-  "name": "local-commit-ai",
-  "displayName": "Local Commit AI",
+  "name": "local-commit-ai-cli",
+  "displayName": "Local Commit AI CLI",
   "description": "Generate Git commit messages with your local Codex, Claude, or other AI CLI.",
   "version": "0.0.1",
   "publisher": "semiherdogan",
@@ -37,9 +37,8 @@
     "watch": "tsc -watch -p ./",
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
-    "build:marketplace": "node scripts/build-marketplace.js",
     "changelog:release": "node scripts/prepare-release-changelog.js",
-    "publish:openvsx": "ovsx publish local-commit-ai-*.vsix"
+    "publish:openvsx": "ovsx publish local-commit-ai-cli-*.vsix"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -53,31 +52,31 @@
       {
         "command": "localCommitAi.generate",
         "title": "Generate Commit Message",
-        "category": "Local Commit AI",
+        "category": "Local Commit AI CLI",
         "icon": "$(sparkle)"
       },
       {
         "command": "localCommitAi.generate.sparkle",
         "title": "Generate Commit Message",
-        "category": "Local Commit AI",
+        "category": "Local Commit AI CLI",
         "icon": "$(sparkle)"
       },
       {
         "command": "localCommitAi.generate.hubot",
         "title": "Generate Commit Message",
-        "category": "Local Commit AI",
+        "category": "Local Commit AI CLI",
         "icon": "$(hubot)"
       },
       {
         "command": "localCommitAi.generate.gitCommit",
         "title": "Generate Commit Message",
-        "category": "Local Commit AI",
+        "category": "Local Commit AI CLI",
         "icon": "$(git-commit)"
       },
       {
         "command": "localCommitAi.generate.commentAdd",
         "title": "Generate Commit Message",
-        "category": "Local Commit AI",
+        "category": "Local Commit AI CLI",
         "icon": "$(comment-add)"
       }
     ],
@@ -127,7 +126,7 @@
       ]
     },
     "configuration": {
-      "title": "Local Commit AI",
+      "title": "Local Commit AI CLI",
       "properties": {
         "localCommitAi.provider": {
           "type": "string",
@@ -194,7 +193,7 @@
         "localCommitAi.debug": {
           "type": "boolean",
           "default": false,
-          "description": "Write generation diagnostics to the Local Commit AI output channel."
+          "description": "Write generation diagnostics to the Local Commit AI CLI output channel."
         }
       }
     }
