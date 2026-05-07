@@ -1,8 +1,8 @@
-# Local Commit AI
+# Local Commit AI CLI
 
 Generate Git commit messages from staged changes in VS Code using your local AI CLI.
 
-Local Commit AI includes presets for Codex CLI and Claude Code CLI, plus a custom provider for any command-line tool that can generate text. The extension runs the selected command on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
+Local Commit AI CLI includes presets for Codex CLI and Claude Code CLI, plus a custom provider for any command-line tool that can generate text. The extension runs the selected command on your machine, sends it the staged Git diff, and writes the generated message back to the Source Control commit input.
 
 ![Local Commit AI demo](https://raw.githubusercontent.com/semiherdogan/local-commit-ai/main/media/demo.gif)
 
@@ -26,12 +26,12 @@ Then install it in VS Code:
 1. Open the Extensions view.
 2. Open the `...` menu in the top-right corner.
 3. Select **Install from VSIX...**.
-4. Choose the downloaded `local-commit-ai-*.vsix` file.
+4. Choose the downloaded `local-commit-ai-cli-*.vsix` file.
 
 You can also install it from the command line:
 
 ```sh
-code --install-extension local-commit-ai-*.vsix
+code --install-extension local-commit-ai-cli-*.vsix
 ```
 
 ## Requirements
@@ -136,7 +136,7 @@ npm run package
 Install the generated package locally:
 
 ```sh
-code --install-extension local-commit-ai-0.0.1.vsix
+code --install-extension local-commit-ai-cli-0.0.1.vsix
 ```
 
 

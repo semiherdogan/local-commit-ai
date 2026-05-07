@@ -1,6 +1,6 @@
 {
-  "name": "local-commit-ai",
-  "displayName": "Local Commit AI",
+  "name": "local-commit-ai-cli",
+  "displayName": "Local Commit AI CLI",
   "description": "Generate Git commit messages with your local Codex, Claude, or other AI CLI.",
   "version": "0.0.1",
   "publisher": "semiherdogan",
@@ -37,7 +37,7 @@
     "watch": "tsc -watch -p ./",
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
-    "publish:openvsx": "ovsx publish local-commit-ai-[0-9]*.vsix",
+    "publish:openvsx": "ovsx publish local-commit-ai-cli-*.vsix",
     "publish:marketplace": "vsce publish --packagePath local-commit-ai-cli-*.vsix"
   },
   "devDependencies": {

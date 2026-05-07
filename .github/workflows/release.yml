@@ -40,19 +40,13 @@ jobs:
 
           npm version "$VERSION" --no-git-tag-version
 
-      - name: Package extension for Open VSX
+      - name: Package extension
         run: npm run package
 
       - name: Publish to Open VSX
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
         run: npm run publish:openvsx
-
-      - name: Package extension for VS Code Marketplace
-        run: |
-          npm pkg set name="local-commit-ai-cli"
-          npm pkg set displayName="Local Commit AI CLI"
-          npm run package
 
       - name: Publish to VS Code Marketplace
         env:
@@ -70,5 +64,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            local-commit-ai-[0-9]*.vsix
             local-commit-ai-cli-*.vsix
