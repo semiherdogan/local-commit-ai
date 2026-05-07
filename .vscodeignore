@@ -2,5 +2,9 @@ src/
 tsconfig.json
 node_modules/
 .github/
+.devbox/
+devbox.json
+devbox.lock
+cliff.toml
 *.vsix
 media/demo.gif
