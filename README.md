@@ -138,6 +138,8 @@ Prepare the changelog before tagging a release:
 npm run changelog:release -- v0.3.1
 ```
 
+Or run the **Prepare Release** GitHub Actions workflow with a version such as `0.3.1`.
+
 Create a VSIX package:
 
 ```sh

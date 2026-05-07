@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -73,5 +74,10 @@ jobs:
       - name: Tag release
         run: |
           git tag "${{ steps.version.outputs.tag }}"
-          git push origin HEAD
+          git push origin "HEAD:${GITHUB_REF_NAME}"
           git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: Trigger release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml --ref "${{ steps.version.outputs.tag }}"
