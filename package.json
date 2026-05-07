@@ -38,6 +38,7 @@
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
     "build:marketplace": "node scripts/build-marketplace.js",
+    "changelog:release": "node scripts/prepare-release-changelog.js",
     "publish:openvsx": "ovsx publish local-commit-ai-*.vsix"
   },
   "devDependencies": {

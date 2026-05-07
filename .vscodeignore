@@ -7,5 +7,6 @@ node_modules/
 devbox.json
 devbox.lock
 cliff.toml
+CHANGELOG.md
 *.vsix
 media/demo.gif

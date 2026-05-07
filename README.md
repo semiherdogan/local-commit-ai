@@ -132,6 +132,12 @@ Build:
 npm run compile
 ```
 
+Prepare the changelog before tagging a release:
+
+```sh
+npm run changelog:release -- v0.3.1
+```
+
 Create a VSIX package:
 
 ```sh
