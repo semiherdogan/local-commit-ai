@@ -36,12 +36,14 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package"
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish local-commit-ai-*.vsix"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/vscode": "^1.95.0",
     "@vscode/vsce": "^3.9.1",
+    "ovsx": "^0.10.11",
     "typescript": "^5.7.2"
   },
   "contributes": {

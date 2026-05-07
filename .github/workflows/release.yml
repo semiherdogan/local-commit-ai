@@ -48,3 +48,8 @@ jobs:
         with:
           generate_release_notes: true
           files: local-commit-ai-*.vsix
+
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
+        run: npm run publish:openvsx
