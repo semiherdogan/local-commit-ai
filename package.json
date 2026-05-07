@@ -38,7 +38,8 @@
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
     "changelog:release": "node scripts/prepare-release-changelog.js",
-    "publish:openvsx": "ovsx publish local-commit-ai-cli-*.vsix"
+    "publish:openvsx": "ovsx publish local-commit-ai-cli-*.vsix",
+    "publish:marketplace": "vsce publish --packagePath local-commit-ai-cli-*.vsix"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
