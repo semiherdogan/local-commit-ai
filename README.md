@@ -13,18 +13,18 @@ Local Commit AI CLI includes presets for Codex CLI and Claude Code CLI, plus a c
 - Sends the diff to `codex exec`, `claude --print`, or your custom command.
 - Writes the generated message back to the Git commit input.
 - Supports a customizable prompt template with `{diff}` replacement.
-- Supports optional model names for both providers.
+- Supports optional model names for built-in providers.
 - Limits the number of diff lines sent to the CLI to keep generation fast and predictable.
 - Lets you choose the toolbar icon from a small set of built-in VS Code icons.
 
 ## Installation
 
-Install from:
+Install from the extension registry:
 
-- [Open VSX Registry](https://open-vsx.org/extension/semiherdogan/local-commit-ai-cli)
 - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=semiherdogan.local-commit-ai-cli)
+- [Open VSX Registry](https://open-vsx.org/extension/semiherdogan/local-commit-ai-cli)
 
-Download the latest VSIX file from [GitHub Releases](https://github.com/semiherdogan/local-commit-ai/releases).
+For manual installation, download the latest VSIX file from [GitHub Releases](https://github.com/semiherdogan/local-commit-ai/releases).
 
 Then install it in VS Code:
 
@@ -41,13 +41,13 @@ code --install-extension local-commit-ai-cli-*.vsix
 
 ## Requirements
 
-Install at least one supported CLI and make sure it is available on `PATH`:
+Install at least one supported CLI:
 
 - [Codex CLI](https://github.com/openai/codex)
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code/overview)
 - Any custom CLI that accepts a prompt through stdin or command arguments
 
-The extension only uses staged changes. Stage files before generating a commit message.
+The CLI must be available on the `PATH` seen by VS Code.
 
 ## Usage
 
@@ -56,6 +56,8 @@ The extension only uses staged changes. Stage files before generating a commit m
 3. Open the Source Control view.
 4. Click **Generate Commit Message** in the Source Control toolbar.
 5. Review the generated message before committing.
+
+Only staged changes are used to generate the commit message.
 
 ## Settings
 
@@ -76,19 +78,30 @@ Example settings:
 ```json
 {
   "localCommitAi.provider": "codex",
-  "localCommitAi.model": "gpt-5.4-mini",
   "localCommitAi.buttonIcon": "hubot",
-  "localCommitAi.maxDiffLines": 100,
-  "localCommitAi.prompt": "You are a commit message generator.\n\nReturn exactly one line and nothing else.\n\nRules:\n- Output must be a single conventional commit message\n- Format: type(scope?): description\n- Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test\n- Use lowercase type\n- Keep the description concise\n- Do not use markdown\n- Do not wrap the message in quotes\n- Do not add explanations, alternatives, notes, warnings, or recommendations\n- Do not mention whether the diff is ready to commit\n- If the diff is small or incomplete, still generate the best possible commit message\n\nStaged git diff:\n{diff}"
+  "localCommitAi.maxDiffLines": 100
 }
 ```
 
-Model examples:
+Start without setting `localCommitAi.model`. When it is empty, the extension lets the selected CLI use its own default model.
 
-| Provider | Model setting |
+Minimal provider settings:
+
+| Provider | Setting |
 | --- | --- |
-| Codex CLI | `gpt-5.4-mini` |
-| Claude Code CLI | `claude-haiku-4-5-20251001` |
+| Codex CLI | `"localCommitAi.provider": "codex"` |
+| Claude Code CLI | `"localCommitAi.provider": "claude"` |
+| Custom CLI | `"localCommitAi.provider": "custom"` |
+
+Only set `localCommitAi.model` if you want to override the CLI default. For Claude Code, aliases such as `sonnet` and `haiku` are supported by the CLI. For Codex CLI, use a model name supported by your Codex CLI version and account.
+
+Prompt customization example:
+
+```json
+{
+  "localCommitAi.prompt": "Write one conventional commit message for this staged diff:\n\n{diff}"
+}
+```
 
 Custom provider example with opencode:
 
@@ -118,40 +131,9 @@ Enable `localCommitAi.debug` to inspect generation diagnostics in the **Local Co
 
 The debug log includes provider, command, argument template, prompt source, diff line counts, duration, exit code, stderr preview, and the generated message. It does not log the full prompt or diff content.
 
-## Packaging
+## Development
 
-Install dependencies:
-
-```sh
-npm install
-```
-
-Build:
-
-```sh
-npm run compile
-```
-
-Prepare the changelog before tagging a release:
-
-```sh
-npm run changelog:release -- v0.3.1
-```
-
-Or run the **Prepare Release** GitHub Actions workflow with a version such as `0.3.1`.
-
-Create a VSIX package:
-
-```sh
-npm run package
-```
-
-Install the generated package locally:
-
-```sh
-code --install-extension local-commit-ai-cli-0.0.1.vsix
-```
-
+For packaging and release steps, see [CONTRIBUTING.md](https://github.com/semiherdogan/local-commit-ai/blob/main/CONTRIBUTING.md).
 
 ## License
 
