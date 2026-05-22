@@ -144,6 +144,11 @@
           "default": "",
           "description": "Optional model name passed to the selected CLI."
         },
+        "localCommitAi.command": {
+          "type": "string",
+          "default": "",
+          "description": "Optional command or absolute executable path for the selected provider. Leave empty to use codex or claude from PATH."
+        },
         "localCommitAi.buttonIcon": {
           "type": "string",
           "enum": [
@@ -164,7 +169,7 @@
         "localCommitAi.customCommand": {
           "type": "string",
           "default": "",
-          "description": "Command used when provider is custom. Example: opencode"
+          "description": "Deprecated. Use localCommitAi.command instead."
         },
         "localCommitAi.customArgs": {
           "type": "array",

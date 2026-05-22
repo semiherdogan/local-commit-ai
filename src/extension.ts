@@ -22,6 +22,7 @@ interface GitRepository {
 
 interface GeneratorConfig {
   provider: Provider;
+  command: string;
   model: string;
   prompt: string;
   maxDiffLines: number;
@@ -131,6 +132,7 @@ function getConfig(): GeneratorConfig {
 
   return {
     provider,
+    command: config.get<string>('command', '').trim(),
     model: config.get<string>('model', '').trim(),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
@@ -182,7 +184,7 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Pro
     return runCustomGenerator(config, prompt, cwd);
   }
 
-  const command = config.provider;
+  const command = config.command || config.provider;
   const args = config.provider === 'codex' ? ['exec'] : ['--print'];
 
   if (config.model) {
@@ -201,19 +203,21 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Pro
 }
 
 function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
-  if (!config.customCommand) {
-    throw new Error('Custom provider requires localCommitAi.customCommand.');
+  const command = config.command || config.customCommand;
+
+  if (!command) {
+    throw new Error('Custom provider requires localCommitAi.command.');
   }
 
   const argsIncludePrompt = config.customArgs.some((arg) => arg.includes('{prompt}'));
   const args = config.customArgs.map((arg) => arg.replaceAll('{prompt}', prompt));
   const stdin = config.customPromptStdin && !argsIncludePrompt ? prompt : undefined;
 
-  debugLog(config, `Command: ${config.customCommand}`);
+  debugLog(config, `Command: ${command}`);
   debugLog(config, `Args template: ${JSON.stringify(config.customArgs)}`);
   debugLog(config, `Prompt source: ${stdin === undefined ? 'args' : 'stdin'}`);
 
-  return runCommand(config.customCommand, args, cwd, stdin, config);
+  return runCommand(command, args, cwd, stdin, config);
 }
 
 function runCommand(command: string, args: string[], cwd: string, stdin?: string, config?: GeneratorConfig): Promise<string> {

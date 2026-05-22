@@ -65,8 +65,9 @@ Only staged changes are used to generate the commit message.
 | --- | --- | --- |
 | `localCommitAi.provider` | `codex` | CLI provider. Supported values: `codex`, `claude`, `custom`. |
 | `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
+| `localCommitAi.command` | `""` | Optional command or absolute executable path for the selected provider. |
 | `localCommitAi.buttonIcon` | `hubot` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
-| `localCommitAi.customCommand` | `""` | Command used when `provider` is `custom`. |
+| `localCommitAi.customCommand` | `""` | Deprecated. Use `localCommitAi.command` instead. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
@@ -91,9 +92,18 @@ Minimal provider settings:
 | --- | --- |
 | Codex CLI | `"localCommitAi.provider": "codex"` |
 | Claude Code CLI | `"localCommitAi.provider": "claude"` |
-| Custom CLI | `"localCommitAi.provider": "custom"` |
+| Custom CLI | `"localCommitAi.provider": "custom"` and `"localCommitAi.command": "your-cli"` |
 
 Only set `localCommitAi.model` if you want to override the CLI default. For Claude Code, aliases such as `sonnet` and `haiku` are supported by the CLI. For Codex CLI, use a model name supported by your Codex CLI version and account.
+
+If the selected CLI is installed outside the `PATH` seen by VS Code, set `localCommitAi.command` to the command name or absolute executable path:
+
+```json
+{
+  "localCommitAi.provider": "codex",
+  "localCommitAi.command": "/custom/path/to/codex"
+}
+```
 
 Prompt customization example:
 
@@ -108,7 +118,7 @@ Custom provider example with opencode:
 ```json
 {
   "localCommitAi.provider": "custom",
-  "localCommitAi.customCommand": "opencode",
+  "localCommitAi.command": "opencode",
   "localCommitAi.customArgs": ["run", "{prompt}"],
   "localCommitAi.customPromptStdin": false
 }
@@ -119,7 +129,7 @@ If your CLI reads from stdin, omit `{prompt}` from `customArgs` and leave `custo
 ```json
 {
   "localCommitAi.provider": "custom",
-  "localCommitAi.customCommand": "your-cli",
+  "localCommitAi.command": "your-cli",
   "localCommitAi.customArgs": ["generate-commit-message"],
   "localCommitAi.customPromptStdin": true
 }
