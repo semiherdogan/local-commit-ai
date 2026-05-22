@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-05-22
+
+### Changed
+
+- Update settings order
+
 ## [0.4.3] - 2026-05-22
 
 ### Added
 
 - Add command settings , deprecate customCommand
+
+### Changed
+
+- Update for v0.4.3
 
 ## [0.4.2] - 2026-05-11
 
@@ -124,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename extension to local commit ai
 - Merge pull request #1 from semiherdogan/dev
 
+[0.4.4]: https://github.com/semiherdogan/local-commit-ai/compare/v0.4.3..v0.4.4
 [0.4.3]: https://github.com/semiherdogan/local-commit-ai/compare/v0.4.2..v0.4.3
 [0.4.2]: https://github.com/semiherdogan/local-commit-ai/compare/v0.4.1..v0.4.2
 [0.4.1]: https://github.com/semiherdogan/local-commit-ai/compare/v0.4.0..v0.4.1
