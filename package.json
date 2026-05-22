@@ -130,6 +130,7 @@
       "title": "Local Commit AI CLI",
       "properties": {
         "localCommitAi.provider": {
+          "order": 1,
           "type": "string",
           "enum": [
             "codex",
@@ -139,17 +140,20 @@
           "default": "codex",
           "description": "CLI provider used to generate commit messages."
         },
-        "localCommitAi.model": {
-          "type": "string",
-          "default": "",
-          "description": "Optional model name passed to the selected CLI."
-        },
         "localCommitAi.command": {
+          "order": 2,
           "type": "string",
           "default": "",
           "description": "Optional command or absolute executable path for the selected provider. Leave empty to use codex or claude from PATH."
         },
+        "localCommitAi.model": {
+          "order": 3,
+          "type": "string",
+          "default": "",
+          "description": "Optional model name passed to the selected CLI."
+        },
         "localCommitAi.buttonIcon": {
+          "order": 4,
           "type": "string",
           "enum": [
             "sparkle",
@@ -166,12 +170,28 @@
           "default": "hubot",
           "description": "Icon used for the generate button in the Source Control toolbar."
         },
-        "localCommitAi.customCommand": {
+        "localCommitAi.prompt": {
+          "order": 5,
           "type": "string",
-          "default": "",
-          "description": "Deprecated. Use localCommitAi.command instead."
+          "editPresentation": "multilineText",
+          "default": "You are a commit message generator.\n\nReturn exactly one line and nothing else.\n\nRules:\n- Output must be a single conventional commit message\n- Format: type(scope?): description\n- Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test\n- Use lowercase type\n- Keep the description concise\n- Do not use markdown\n- Do not wrap the message in quotes\n- Do not add explanations, alternatives, notes, warnings, or recommendations\n- Do not mention whether the diff is ready to commit\n- If the diff is small or incomplete, still generate the best possible commit message\n\nStaged git diff:\n{diff}",
+          "description": "Prompt template. Use {diff} where the staged git diff should be inserted."
+        },
+        "localCommitAi.maxDiffLines": {
+          "order": 6,
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
+        },
+        "localCommitAi.debug": {
+          "order": 7,
+          "type": "boolean",
+          "default": false,
+          "description": "Write generation diagnostics to the Local Commit AI CLI output channel."
         },
         "localCommitAi.customArgs": {
+          "order": 8,
           "type": "array",
           "items": {
             "type": "string"
@@ -180,26 +200,16 @@
           "description": "Arguments used when provider is custom. Use {prompt} to insert the generated prompt into an argument."
         },
         "localCommitAi.customPromptStdin": {
+          "order": 9,
           "type": "boolean",
           "default": true,
           "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
-        "localCommitAi.prompt": {
+        "localCommitAi.customCommand": {
+          "order": 10,
           "type": "string",
-          "editPresentation": "multilineText",
-          "default": "You are a commit message generator.\n\nReturn exactly one line and nothing else.\n\nRules:\n- Output must be a single conventional commit message\n- Format: type(scope?): description\n- Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test\n- Use lowercase type\n- Keep the description concise\n- Do not use markdown\n- Do not wrap the message in quotes\n- Do not add explanations, alternatives, notes, warnings, or recommendations\n- Do not mention whether the diff is ready to commit\n- If the diff is small or incomplete, still generate the best possible commit message\n\nStaged git diff:\n{diff}",
-          "description": "Prompt template. Use {diff} where the staged git diff should be inserted."
-        },
-        "localCommitAi.maxDiffLines": {
-          "type": "number",
-          "default": 100,
-          "minimum": 0,
-          "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
-        },
-        "localCommitAi.debug": {
-          "type": "boolean",
-          "default": false,
-          "description": "Write generation diagnostics to the Local Commit AI CLI output channel."
+          "default": "",
+          "description": "Deprecated. Use localCommitAi.command instead."
         }
       }
     }

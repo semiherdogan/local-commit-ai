@@ -64,15 +64,15 @@ Only staged changes are used to generate the commit message.
 | Setting | Default | Description |
 | --- | --- | --- |
 | `localCommitAi.provider` | `codex` | CLI provider. Supported values: `codex`, `claude`, `custom`. |
-| `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
 | `localCommitAi.command` | `""` | Optional command or absolute executable path for the selected provider. |
+| `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
 | `localCommitAi.buttonIcon` | `hubot` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
-| `localCommitAi.customCommand` | `""` | Deprecated. Use `localCommitAi.command` instead. |
-| `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
-| `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
 | `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
 | `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
+| `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
+| `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
+| `localCommitAi.customCommand` | `""` | Deprecated. Use `localCommitAi.command` instead. |
 
 Example settings:
 
@@ -85,6 +85,14 @@ Example settings:
 ```
 
 Start without setting `localCommitAi.model`. When it is empty, the extension lets the selected CLI use its own default model.
+
+Prompt customization example:
+
+```json
+{
+  "localCommitAi.prompt": "Write one conventional commit message for this staged diff:\n\n{diff}"
+}
+```
 
 Minimal provider settings:
 
@@ -102,14 +110,6 @@ If the selected CLI is installed outside the `PATH` seen by VS Code, set `localC
 {
   "localCommitAi.provider": "codex",
   "localCommitAi.command": "/custom/path/to/codex"
-}
-```
-
-Prompt customization example:
-
-```json
-{
-  "localCommitAi.prompt": "Write one conventional commit message for this staged diff:\n\n{diff}"
 }
 ```
 
