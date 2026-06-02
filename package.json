@@ -4,7 +4,7 @@
   "description": "Generate Git commit messages with your local Codex, Claude, or other AI CLI.",
   "version": "0.0.1",
   "publisher": "semiherdogan",
-  "packageManager": "npm@11.12.1",
+  "packageManager": "npm@11.16.0",
   "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
@@ -42,11 +42,11 @@
     "publish:marketplace": "vsce publish --packagePath local-commit-ai-cli-*.vsix"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/vscode": "^1.95.0",
+    "@types/node": "^25.9.1",
+    "@types/vscode": "^1.120.0",
     "@vscode/vsce": "^3.9.1",
-    "ovsx": "^0.10.11",
-    "typescript": "^5.7.2"
+    "ovsx": "^1.0.0",
+    "typescript": "^6.0.3"
   },
   "contributes": {
     "commands": [
