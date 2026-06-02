@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
 
 const outputChannel = vscode.window.createOutputChannel('Local Commit AI CLI');
+const generationTimeoutMs = 120_000;
 
 type Provider = 'codex' | 'claude' | 'custom';
 
@@ -87,10 +88,11 @@ async function generateCommitMessage() {
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.SourceControl,
-        title: 'Generating commit message...'
+        title: 'Generating commit message...',
+        cancellable: true
       },
-      async () => {
-        const message = await runGenerator(config, prompt, repository.rootUri.fsPath);
+      async (_progress, token) => {
+        const message = await runGenerator(config, prompt, repository.rootUri.fsPath, token);
         const sanitizedMessage = sanitizeCommitMessage(message);
 
         debugLog(config, `Raw output length: ${message.length}`);
@@ -179,9 +181,9 @@ function limitDiff(diff: string, maxLines: number): string {
   return lines.slice(0, maxLines).join('\n');
 }
 
-function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
+function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, token: vscode.CancellationToken): Promise<string> {
   if (config.provider === 'custom') {
-    return runCustomGenerator(config, prompt, cwd);
+    return runCustomGenerator(config, prompt, cwd, token);
   }
 
   const command = config.command || config.provider;
@@ -199,10 +201,15 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string): Pro
   debugLog(config, `Args: ${JSON.stringify(args)}`);
   debugLog(config, 'Prompt source: stdin');
 
-  return runCommand(command, args, cwd, prompt, config);
+  return runCommand(command, args, cwd, {
+    stdin: prompt,
+    config,
+    timeoutMs: generationTimeoutMs,
+    token
+  });
 }
 
-function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string): Promise<string> {
+function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string, token: vscode.CancellationToken): Promise<string> {
   const command = config.command || config.customCommand;
 
   if (!command) {
@@ -217,15 +224,69 @@ function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string
   debugLog(config, `Args template: ${JSON.stringify(config.customArgs)}`);
   debugLog(config, `Prompt source: ${stdin === undefined ? 'args' : 'stdin'}`);
 
-  return runCommand(command, args, cwd, stdin, config);
+  return runCommand(command, args, cwd, {
+    stdin,
+    config,
+    timeoutMs: generationTimeoutMs,
+    token
+  });
 }
 
-function runCommand(command: string, args: string[], cwd: string, stdin?: string, config?: GeneratorConfig): Promise<string> {
+interface CommandOptions {
+  stdin?: string;
+  config?: GeneratorConfig;
+  timeoutMs?: number;
+  token?: vscode.CancellationToken;
+}
+
+function runCommand(command: string, args: string[], cwd: string, options: CommandOptions = {}): Promise<string> {
   return new Promise((resolve, reject) => {
+    const { stdin, config, timeoutMs, token } = options;
     const startedAt = Date.now();
     const child = spawn(command, args, { cwd });
     let stdout = '';
     let stderr = '';
+    let settled = false;
+    let timeout: NodeJS.Timeout | undefined;
+    let cancellation = { dispose() {} };
+
+    const finish = (callback: () => void) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      cancellation.dispose();
+
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      callback();
+    };
+
+    const stopChild = (message: string) => {
+      if (!child.killed) {
+        child.kill();
+      }
+
+      finish(() => reject(new Error(message)));
+    };
+
+    cancellation = token?.onCancellationRequested(() => {
+      stopChild('Generation cancelled.');
+    }) ?? { dispose() {} };
+
+    if (token?.isCancellationRequested) {
+      stopChild('Generation cancelled.');
+      return;
+    }
+
+    if (timeoutMs && timeoutMs > 0) {
+      timeout = setTimeout(() => {
+        stopChild(`Generation timed out after ${Math.round(timeoutMs / 1000)} seconds.`);
+      }, timeoutMs);
+    }
 
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
@@ -243,7 +304,7 @@ function runCommand(command: string, args: string[], cwd: string, stdin?: string
         debugLog(config, `Command error: ${error.message}`);
       }
 
-      reject(error);
+      finish(() => reject(error));
     });
 
     child.on('close', (code) => {
@@ -257,11 +318,11 @@ function runCommand(command: string, args: string[], cwd: string, stdin?: string
       }
 
       if (code === 0) {
-        resolve(stdout);
+        finish(() => resolve(stdout));
         return;
       }
 
-      reject(new Error(stderr.trim() || `${command} exited with code ${code}`));
+      finish(() => reject(new Error(stderr.trim() || `${command} exited with code ${code}`)));
     });
 
     child.stdin.end(stdin);
@@ -285,5 +346,5 @@ function sanitizeCommitMessage(message: string): string {
     .map((line) => line.trim().replace(/^[-*>\s`]+/, '').replace(/`+$/, '').trim());
   const commitLineIndex = lines.findIndex((line) => conventionalCommitPattern.test(line));
 
-  return commitLineIndex === -1 ? cleaned : lines.slice(commitLineIndex).join('\n').trim();
+  return commitLineIndex === -1 ? cleaned : lines[commitLineIndex];
 }

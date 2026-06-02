@@ -113,18 +113,7 @@ If the selected CLI is installed outside the `PATH` seen by VS Code, set `localC
 }
 ```
 
-Custom provider example with opencode:
-
-```json
-{
-  "localCommitAi.provider": "custom",
-  "localCommitAi.command": "opencode",
-  "localCommitAi.customArgs": ["run", "{prompt}"],
-  "localCommitAi.customPromptStdin": false
-}
-```
-
-If your CLI reads from stdin, omit `{prompt}` from `customArgs` and leave `customPromptStdin` enabled:
+Custom provider example:
 
 ```json
 {
@@ -132,6 +121,17 @@ If your CLI reads from stdin, omit `{prompt}` from `customArgs` and leave `custo
   "localCommitAi.command": "your-cli",
   "localCommitAi.customArgs": ["generate-commit-message"],
   "localCommitAi.customPromptStdin": true
+}
+```
+
+Prefer stdin for custom providers. Only use `{prompt}` in `customArgs` when the CLI cannot read stdin, because it places the full prompt in process arguments:
+
+```json
+{
+  "localCommitAi.provider": "custom",
+  "localCommitAi.command": "your-cli",
+  "localCommitAi.customArgs": ["generate-commit-message", "{prompt}"],
+  "localCommitAi.customPromptStdin": false
 }
 ```
 

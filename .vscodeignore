@@ -4,9 +4,7 @@ scripts/
 tsconfig.json
 node_modules/
 .github/
-.devbox/
-devbox.json
-devbox.lock
+mise.toml
 cliff.toml
 CHANGELOG.md
 CONTRIBUTING.md

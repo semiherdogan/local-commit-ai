@@ -5,11 +5,12 @@
 Use the project runtime when possible:
 
 ```sh
-devbox shell
+mise trust
+mise install
 npm install
 ```
 
-If you do not use devbox, install Node.js 22 or newer and run:
+If you do not use mise, install Node.js 22 or newer and run:
 
 ```sh
 npm install
@@ -51,7 +52,7 @@ When checking package contents without writing a VSIX into the repo, use an expl
 npm run package -- --out /tmp/local-commit-ai-cli.vsix
 ```
 
-The extension package intentionally excludes repository-only files such as source files, release scripts, devbox config, changelog, demo gif, and this contributing guide.
+The extension package intentionally excludes repository-only files such as source files, release scripts, mise config, changelog, demo gif, and this contributing guide.
 
 ## Release Process
 
@@ -69,11 +70,12 @@ Preferred release path:
 
 The release workflow:
 
-1. Sets `package.json` version from the tag.
-2. Packages the extension.
-3. Publishes to Open VSX.
-4. Publishes to VS Code Marketplace.
-5. Creates a GitHub release with the VSIX attached.
+1. Checks out the release tag.
+2. Sets `package.json` version from the workflow input.
+3. Packages the extension.
+4. Publishes to Open VSX.
+5. Publishes to VS Code Marketplace.
+6. Creates a GitHub release with the VSIX attached.
 
 To prepare a changelog locally before tagging:
 
