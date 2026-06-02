@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
+import * as path from 'node:path';
 
 const outputChannel = vscode.window.createOutputChannel('Local Commit AI CLI');
 const generationTimeoutMs = 120_000;
@@ -18,6 +19,11 @@ interface GitRepository {
   rootUri: vscode.Uri;
   inputBox: {
     value: string;
+  };
+  state?: {
+    HEAD?: {
+      name?: string;
+    };
   };
 }
 
@@ -50,14 +56,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-async function generateCommitMessage() {
+async function generateCommitMessage(...commandArgs: unknown[]) {
   const config = getConfig();
   beginDebugSession(config);
 
   try {
     debugLog(config, 'Generate command invoked');
 
-    const repository = await getRepository();
+    const repository = await getRepository(config, commandArgs);
 
     if (!repository) {
       debugLog(config, 'No Git repository found');
@@ -109,23 +115,166 @@ async function generateCommitMessage() {
   }
 }
 
-async function getRepository(): Promise<GitRepository | undefined> {
+async function getRepository(config: GeneratorConfig, commandArgs: unknown[]): Promise<GitRepository | undefined> {
+  const argumentRepository = getRepositoryFromCommandArgs(commandArgs);
   const gitExtension = vscode.extensions.getExtension<GitExtensionApi>('vscode.git');
   const git = gitExtension?.isActive ? gitExtension.exports : await gitExtension?.activate();
   const api = git?.getAPI(1);
 
   if (!api?.repositories.length) {
+    return argumentRepository;
+  }
+
+  if (argumentRepository) {
+    return findRepository(api.repositories, argumentRepository.rootUri.fsPath) ?? argumentRepository;
+  }
+
+  const workspaceFolders = getPreferredWorkspaceFolders();
+
+  if (!workspaceFolders.length) {
+    return selectRepository(api.repositories);
+  }
+
+  for (const workspaceFolder of workspaceFolders) {
+    const directMatch = findRepository(api.repositories, workspaceFolder.uri.fsPath);
+
+    if (directMatch) {
+      return directMatch;
+    }
+
+    const rootPath = await getGitRootPath(workspaceFolder.uri.fsPath, config);
+
+    if (!rootPath) {
+      continue;
+    }
+
+    const rootMatch = findRepository(api.repositories, rootPath);
+
+    if (rootMatch) {
+      debugLog(config, `Resolved Git root: ${rootPath}`);
+      return rootMatch;
+    }
+  }
+
+  return selectRepository(api.repositories);
+}
+
+function getRepositoryFromCommandArgs(commandArgs: unknown[]): GitRepository | undefined {
+  for (const commandArg of commandArgs) {
+    const repository = getRepositoryLike(commandArg);
+
+    if (repository) {
+      return repository;
+    }
+  }
+
+  return undefined;
+}
+
+function getRepositoryLike(value: unknown, depth = 0): GitRepository | undefined {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const repository = getRepositoryLike(item, depth);
+
+      if (repository) {
+        return repository;
+      }
+    }
+
     return undefined;
   }
 
-  const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-
-  if (!workspaceFolder) {
-    return api.repositories[0];
+  if (!isRecord(value)) {
+    return undefined;
   }
 
-  return api.repositories.find((repository) => repository.rootUri.fsPath === workspaceFolder.uri.fsPath)
-    ?? api.repositories[0];
+  if (isRepositoryLike(value)) {
+    return value;
+  }
+
+  if (depth >= 1) {
+    return undefined;
+  }
+
+  return getRepositoryLike(value.repository, depth + 1)
+    ?? getRepositoryLike(value.sourceControl, depth + 1);
+}
+
+function isRepositoryLike(value: unknown): value is GitRepository {
+  return isRecord(value)
+    && isRecord(value.rootUri)
+    && typeof value.rootUri.fsPath === 'string'
+    && isRecord(value.inputBox)
+    && typeof value.inputBox.value === 'string';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function getPreferredWorkspaceFolders(): vscode.WorkspaceFolder[] {
+  const workspaceFolders = [...(vscode.workspace.workspaceFolders ?? [])];
+  const activeUri = vscode.window.activeTextEditor?.document.uri;
+  const activeWorkspaceFolder = activeUri?.scheme === 'file'
+    ? vscode.workspace.getWorkspaceFolder(activeUri)
+    : undefined;
+
+  if (!activeWorkspaceFolder) {
+    return workspaceFolders;
+  }
+
+  return [
+    activeWorkspaceFolder,
+    ...workspaceFolders.filter((workspaceFolder) => workspaceFolder.uri.fsPath !== activeWorkspaceFolder.uri.fsPath)
+  ];
+}
+
+function findRepository(repositories: GitRepository[], fsPath: string): GitRepository | undefined {
+  const normalizedPath = normalizeFsPath(fsPath);
+
+  return repositories.find((repository) => normalizeFsPath(repository.rootUri.fsPath) === normalizedPath);
+}
+
+function normalizeFsPath(fsPath: string): string {
+  return path.resolve(fsPath);
+}
+
+async function getGitRootPath(cwd: string, config: GeneratorConfig): Promise<string | undefined> {
+  try {
+    const rootPath = await runCommand('git', ['rev-parse', '--show-toplevel'], cwd);
+
+    return rootPath.trim() || undefined;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    debugLog(config, `Could not resolve Git root for ${cwd}: ${message}`);
+
+    return undefined;
+  }
+}
+
+async function selectRepository(repositories: GitRepository[]): Promise<GitRepository | undefined> {
+  if (repositories.length <= 1) {
+    return repositories[0];
+  }
+
+  const items = repositories.map((repository) => ({
+    label: formatRepositoryLabel(repository),
+    description: repository.rootUri.fsPath,
+    repository
+  }));
+  const selected = await vscode.window.showQuickPick(items, {
+    placeHolder: 'Select the repository to generate a commit message for'
+  });
+
+  return selected?.repository;
+}
+
+function formatRepositoryLabel(repository: GitRepository): string {
+  const branchName = repository.state?.HEAD?.name;
+
+  return branchName
+    ? `${path.basename(repository.rootUri.fsPath)} (${branchName})`
+    : path.basename(repository.rootUri.fsPath);
 }
 
 function getConfig(): GeneratorConfig {

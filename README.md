@@ -10,6 +10,8 @@ Local Commit AI CLI includes presets for Codex CLI and Claude Code CLI, plus a c
 
 - Adds a **Generate Commit Message** action to the Source Control toolbar.
 - Reads staged changes with `git diff --cached`.
+- Supports Git worktrees and repositories opened from a subfolder.
+- Prompts for a repository when multiple Git repositories are open and VS Code does not provide the clicked Source Control context.
 - Sends the diff to `codex exec`, `claude --print`, or your custom command.
 - Writes the generated message back to the Git commit input.
 - Supports a customizable prompt template with `{diff}` replacement.
