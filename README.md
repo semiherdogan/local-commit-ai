@@ -71,6 +71,7 @@ Only staged changes are used to generate the commit message.
 | `localCommitAi.buttonIcon` | `hubot` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
 | `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
+| `localCommitAi.recentCommitExampleCount` | `0` | Number of recent commit message subjects to include as style examples. Use `0` to disable. |
 | `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
@@ -82,7 +83,8 @@ Example settings:
 {
   "localCommitAi.provider": "codex",
   "localCommitAi.buttonIcon": "hubot",
-  "localCommitAi.maxDiffLines": 100
+  "localCommitAi.maxDiffLines": 100,
+  "localCommitAi.recentCommitExampleCount": 3
 }
 ```
 

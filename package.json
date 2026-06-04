@@ -184,14 +184,22 @@
           "minimum": 0,
           "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
         },
-        "localCommitAi.debug": {
+        "localCommitAi.recentCommitExampleCount": {
           "order": 7,
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Number of recent commit message subjects to include as style examples. Set to 0 to disable."
+        },
+        "localCommitAi.debug": {
+          "order": 8,
           "type": "boolean",
           "default": false,
           "description": "Write generation diagnostics to the Local Commit AI CLI output channel."
         },
         "localCommitAi.customArgs": {
-          "order": 8,
+          "order": 9,
           "type": "array",
           "items": {
             "type": "string"
@@ -200,13 +208,13 @@
           "description": "Arguments used when provider is custom. Prefer stdin; using {prompt} places the full prompt in process arguments."
         },
         "localCommitAi.customPromptStdin": {
-          "order": 9,
+          "order": 10,
           "type": "boolean",
           "default": true,
           "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
         "localCommitAi.customCommand": {
-          "order": 10,
+          "order": 11,
           "type": "string",
           "default": "",
           "description": "Deprecated. Use localCommitAi.command instead."

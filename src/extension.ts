@@ -4,6 +4,8 @@ import * as path from 'node:path';
 
 const outputChannel = vscode.window.createOutputChannel('Local Commit AI CLI');
 const generationTimeoutMs = 120_000;
+const maxRecentCommitExamples = 10;
+const maxRecentCommitExampleLength = 160;
 
 type Provider = 'codex' | 'claude' | 'custom';
 
@@ -33,6 +35,7 @@ interface GeneratorConfig {
   model: string;
   prompt: string;
   maxDiffLines: number;
+  recentCommitExampleCount: number;
   debug: boolean;
   customCommand: string;
   customArgs: string[];
@@ -80,16 +83,16 @@ async function generateCommitMessage(...commandArgs: unknown[]) {
     }
 
     const limitedDiff = limitDiff(diff, config.maxDiffLines);
+    const recentCommitExamples = await getRecentCommitExamples(config, repository.rootUri.fsPath);
 
     debugLog(config, 'Starting generation');
     debugLog(config, `Repository: ${repository.rootUri.fsPath}`);
     debugLog(config, `Provider: ${config.provider}`);
     debugLog(config, `Diff lines: ${countLines(diff)}`);
     debugLog(config, `Prompt diff lines: ${countLines(limitedDiff)}`);
+    debugLog(config, `Recent commit examples: ${recentCommitExamples.length}`);
 
-    const prompt = config.prompt.includes('{diff}')
-      ? config.prompt.replaceAll('{diff}', limitedDiff)
-      : `${config.prompt.trim()}\n\nDiff:\n${limitedDiff}`;
+    const prompt = buildPrompt(config.prompt, limitedDiff, recentCommitExamples);
 
     await vscode.window.withProgress(
       {
@@ -287,6 +290,10 @@ function getConfig(): GeneratorConfig {
     model: config.get<string>('model', '').trim(),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
+    recentCommitExampleCount: Math.min(
+      maxRecentCommitExamples,
+      Math.max(0, Math.floor(config.get<number>('recentCommitExampleCount', 0)))
+    ),
     debug: config.get<boolean>('debug', false),
     customCommand: config.get<string>('customCommand', '').trim(),
     customArgs: config.get<string[]>('customArgs', []),
@@ -328,6 +335,51 @@ function limitDiff(diff: string, maxLines: number): string {
   }
 
   return lines.slice(0, maxLines).join('\n');
+}
+
+async function getRecentCommitExamples(config: GeneratorConfig, cwd: string): Promise<string[]> {
+  if (config.recentCommitExampleCount === 0) {
+    return [];
+  }
+
+  try {
+    const output = await runCommand(
+      'git',
+      ['log', `--max-count=${config.recentCommitExampleCount}`, '--pretty=format:%s'],
+      cwd
+    );
+
+    return output
+      .split(/\r?\n/)
+      .map((line) => truncateCommitExample(line.trim()))
+      .filter(Boolean);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    debugLog(config, `Recent commit examples unavailable: ${message}`);
+    return [];
+  }
+}
+
+function truncateCommitExample(message: string): string {
+  if (message.length <= maxRecentCommitExampleLength) {
+    return message;
+  }
+
+  return `${message.slice(0, maxRecentCommitExampleLength - 3).trimEnd()}...`;
+}
+
+function buildPrompt(promptTemplate: string, diff: string, recentCommitExamples: string[]): string {
+  const prompt = promptTemplate.includes('{diff}')
+    ? promptTemplate.replaceAll('{diff}', diff)
+    : `${promptTemplate.trim()}\n\nDiff:\n${diff}`;
+
+  if (!recentCommitExamples.length) {
+    return prompt;
+  }
+
+  const examples = recentCommitExamples.map((message) => `- ${message}`).join('\n');
+
+  return `Recent commit message examples from this repository. Match their style only when it fits the staged diff:\n${examples}\n\n${prompt}`;
 }
 
 function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, token: vscode.CancellationToken): Promise<string> {
