@@ -4,6 +4,7 @@ import * as path from 'node:path';
 
 const outputChannel = vscode.window.createOutputChannel('Local Commit AI CLI');
 const generationTimeoutMs = 120_000;
+const maxDiffBytes = 48 * 1024;
 const maxRecentCommitExamples = 10;
 const maxRecentCommitExampleLength = 160;
 
@@ -90,6 +91,8 @@ async function generateCommitMessage(...commandArgs: unknown[]) {
     debugLog(config, `Provider: ${config.provider}`);
     debugLog(config, `Diff lines: ${countLines(diff)}`);
     debugLog(config, `Prompt diff lines: ${countLines(limitedDiff)}`);
+    debugLog(config, `Diff bytes: ${Buffer.byteLength(diff, 'utf8')}`);
+    debugLog(config, `Prompt diff bytes: ${Buffer.byteLength(limitedDiff, 'utf8')}`);
     debugLog(config, `Recent commit examples: ${recentCommitExamples.length}`);
 
     const prompt = buildPrompt(config.prompt, limitedDiff, recentCommitExamples);
@@ -324,17 +327,28 @@ function debugLog(config: GeneratorConfig, message: string) {
 }
 
 function limitDiff(diff: string, maxLines: number): string {
-  if (maxLines === 0) {
-    return diff;
+  let limitedDiff = diff;
+
+  if (maxLines > 0) {
+    const lines = diff.split(/\r?\n/);
+
+    if (lines.length > maxLines) {
+      limitedDiff = lines.slice(0, maxLines).join('\n');
+    }
   }
 
-  const lines = diff.split(/\r?\n/);
-
-  if (lines.length <= maxLines) {
-    return diff;
+  if (Buffer.byteLength(limitedDiff, 'utf8') <= maxDiffBytes) {
+    return limitedDiff;
   }
 
-  return lines.slice(0, maxLines).join('\n');
+  const bytes = Buffer.from(limitedDiff, 'utf8');
+  let end = maxDiffBytes;
+
+  while (end > 0 && (bytes[end] & 0xc0) === 0x80) {
+    end--;
+  }
+
+  return bytes.subarray(0, end).toString('utf8');
 }
 
 async function getRecentCommitExamples(config: GeneratorConfig, cwd: string): Promise<string[]> {
@@ -401,6 +415,15 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, toke
   debugLog(config, `Command: ${command}`);
   debugLog(config, `Args: ${JSON.stringify(args)}`);
   debugLog(config, 'Prompt source: stdin');
+  debugLog(
+    config,
+    `Terminal debug command:\n${formatTerminalCommand(
+      command,
+      config.provider === 'claude' ? ['--debug', ...args] : args,
+      cwd,
+      prompt
+    )}`
+  );
 
   return runCommand(command, args, cwd, {
     stdin: prompt,
@@ -431,6 +454,27 @@ function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string
     timeoutMs: generationTimeoutMs,
     token
   });
+}
+
+function formatTerminalCommand(command: string, args: string[], cwd: string, stdin?: string): string {
+  const invocation = [command, ...args].map(shellQuote).join(' ');
+  const commandLine = `cd ${shellQuote(cwd)} && ${invocation}`;
+
+  if (stdin === undefined) {
+    return commandLine;
+  }
+
+  let delimiter = 'LOCAL_COMMIT_AI_PROMPT';
+
+  while (stdin.split(/\r?\n/).includes(delimiter)) {
+    delimiter += '_';
+  }
+
+  return `${commandLine} <<'${delimiter}'\n${stdin}${stdin.endsWith('\n') ? '' : '\n'}${delimiter}`;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
 
 interface CommandOptions {

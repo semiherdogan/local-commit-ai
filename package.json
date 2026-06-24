@@ -182,7 +182,7 @@
           "type": "number",
           "default": 100,
           "minimum": 0,
-          "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable truncation."
+          "description": "Maximum number of staged diff lines sent to the CLI. Set to 0 to disable line truncation. A 48 KiB safety limit still applies."
         },
         "localCommitAi.recentCommitExampleCount": {
           "order": 7,

@@ -70,7 +70,7 @@ Only staged changes are used to generate the commit message.
 | `localCommitAi.model` | `""` | Optional model name passed to the selected CLI. |
 | `localCommitAi.buttonIcon` | `hubot` | Toolbar icon. Supported values: `sparkle`, `hubot`, `gitCommit`, `commentAdd`. |
 | `localCommitAi.prompt` | Conventional commit prompt | Prompt template. Use `{diff}` where the staged diff should be inserted. |
-| `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable truncation. |
+| `localCommitAi.maxDiffLines` | `100` | Maximum staged diff lines sent to the CLI. Use `0` to disable line truncation. A 48 KiB safety limit still applies. |
 | `localCommitAi.recentCommitExampleCount` | `0` | Number of recent commit message subjects to include as style examples. Use `0` to disable. |
 | `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
@@ -143,7 +143,9 @@ Prefer stdin for custom providers. Only use `{prompt}` in `customArgs` when the 
 
 Enable `localCommitAi.debug` to inspect generation diagnostics in the **Local Commit AI CLI** output channel.
 
-The debug log includes provider, command, argument template, prompt source, diff line counts, duration, exit code, stderr preview, and the generated message. It does not log the full prompt or diff content.
+The debug log includes provider, command, argument template, prompt source, diff line counts, duration, exit code, stderr preview, the generated message, and a copyable terminal command. For Claude, the terminal command enables the CLI's `--debug` mode.
+
+The terminal command contains the full prompt and staged diff. Do not share debug logs without reviewing them first.
 
 ## Development
 
