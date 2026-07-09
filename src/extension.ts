@@ -7,6 +7,7 @@ const generationTimeoutMs = 120_000;
 const maxDiffBytes = 48 * 1024;
 const maxRecentCommitExamples = 10;
 const maxRecentCommitExampleLength = 160;
+let activeGeneration: vscode.CancellationTokenSource | undefined;
 
 type Provider = 'codex' | 'claude' | 'custom';
 
@@ -34,6 +35,7 @@ interface GeneratorConfig {
   provider: Provider;
   command: string;
   model: string;
+  claudeSettingSources: string;
   prompt: string;
   maxDiffLines: number;
   recentCommitExampleCount: number;
@@ -54,15 +56,26 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     outputChannel,
+    vscode.commands.registerCommand('localCommitAi.stop', stopGeneration),
     ...commands.map((command) => vscode.commands.registerCommand(command, generateCommitMessage))
   );
+
+  void vscode.commands.executeCommand('setContext', 'localCommitAi.generating', false);
 }
 
 export function deactivate() {}
 
 async function generateCommitMessage(...commandArgs: unknown[]) {
+  if (activeGeneration) {
+    vscode.window.showWarningMessage('Commit message generation is already running.');
+    return;
+  }
+
+  const generation = new vscode.CancellationTokenSource();
   const config = getConfig();
   beginDebugSession(config);
+  activeGeneration = generation;
+  await vscode.commands.executeCommand('setContext', 'localCommitAi.generating', true);
 
   try {
     debugLog(config, 'Generate command invoked');
@@ -75,7 +88,9 @@ async function generateCommitMessage(...commandArgs: unknown[]) {
       return;
     }
 
-    const diff = await runCommand('git', ['diff', '--cached'], repository.rootUri.fsPath);
+    const diff = await runCommand('git', ['diff', '--cached'], repository.rootUri.fsPath, {
+      token: generation.token
+    });
 
     if (!diff.trim()) {
       debugLog(config, 'No staged changes found');
@@ -84,7 +99,7 @@ async function generateCommitMessage(...commandArgs: unknown[]) {
     }
 
     const limitedDiff = limitDiff(diff, config.maxDiffLines);
-    const recentCommitExamples = await getRecentCommitExamples(config, repository.rootUri.fsPath);
+    const recentCommitExamples = await getRecentCommitExamples(config, repository.rootUri.fsPath, generation.token);
 
     debugLog(config, 'Starting generation');
     debugLog(config, `Repository: ${repository.rootUri.fsPath}`);
@@ -104,21 +119,55 @@ async function generateCommitMessage(...commandArgs: unknown[]) {
         cancellable: true
       },
       async (_progress, token) => {
-        const message = await runGenerator(config, prompt, repository.rootUri.fsPath, token);
-        const sanitizedMessage = sanitizeCommitMessage(message);
+        const progressCancellation = token.onCancellationRequested(() => {
+          generation.cancel();
+        });
 
-        debugLog(config, `Raw output length: ${message.length}`);
-        debugLog(config, `Sanitized output length: ${sanitizedMessage.length}`);
-        debugLog(config, `Generated message: ${sanitizedMessage}`);
+        try {
+          const message = await runGenerator(config, prompt, repository.rootUri.fsPath, generation.token);
+          const sanitizedMessage = sanitizeCommitMessage(message);
 
-        repository.inputBox.value = sanitizedMessage;
+          debugLog(config, `Raw output length: ${message.length}`);
+          debugLog(config, `Sanitized output length: ${sanitizedMessage.length}`);
+          debugLog(config, `Generated message: ${sanitizedMessage}`);
+
+          repository.inputBox.value = sanitizedMessage;
+        } finally {
+          progressCancellation.dispose();
+        }
       }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+
+    if (isCancellationError(error)) {
+      debugLog(config, 'Generation cancelled');
+      return;
+    }
+
     debugLog(config, `Generation failed: ${message}`);
     vscode.window.showErrorMessage(`Failed to generate commit message: ${message}`);
+  } finally {
+    if (activeGeneration === generation) {
+      activeGeneration = undefined;
+      await vscode.commands.executeCommand('setContext', 'localCommitAi.generating', false);
+    }
+
+    generation.dispose();
   }
+}
+
+function stopGeneration() {
+  if (!activeGeneration) {
+    vscode.window.showInformationMessage('No commit message generation is running.');
+    return;
+  }
+
+  activeGeneration.cancel();
+}
+
+function isCancellationError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Generation cancelled.';
 }
 
 async function getRepository(config: GeneratorConfig, commandArgs: unknown[]): Promise<GitRepository | undefined> {
@@ -291,6 +340,7 @@ function getConfig(): GeneratorConfig {
     provider,
     command: config.get<string>('command', '').trim(),
     model: config.get<string>('model', '').trim(),
+    claudeSettingSources: config.get<string>('claudeSettingSources', 'user').trim(),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
     recentCommitExampleCount: Math.min(
@@ -351,7 +401,11 @@ function limitDiff(diff: string, maxLines: number): string {
   return bytes.subarray(0, end).toString('utf8');
 }
 
-async function getRecentCommitExamples(config: GeneratorConfig, cwd: string): Promise<string[]> {
+async function getRecentCommitExamples(
+  config: GeneratorConfig,
+  cwd: string,
+  token?: vscode.CancellationToken
+): Promise<string[]> {
   if (config.recentCommitExampleCount === 0) {
     return [];
   }
@@ -360,7 +414,8 @@ async function getRecentCommitExamples(config: GeneratorConfig, cwd: string): Pr
     const output = await runCommand(
       'git',
       ['log', `--max-count=${config.recentCommitExampleCount}`, '--pretty=format:%s'],
-      cwd
+      cwd,
+      { token }
     );
 
     return output
@@ -368,6 +423,10 @@ async function getRecentCommitExamples(config: GeneratorConfig, cwd: string): Pr
       .map((line) => truncateCommitExample(line.trim()))
       .filter(Boolean);
   } catch (error) {
+    if (isCancellationError(error)) {
+      throw error;
+    }
+
     const message = error instanceof Error ? error.message : String(error);
     debugLog(config, `Recent commit examples unavailable: ${message}`);
     return [];
@@ -403,6 +462,10 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, toke
 
   const command = config.command || config.provider;
   const args = config.provider === 'codex' ? ['exec'] : ['--print'];
+
+  if (config.provider === 'claude' && config.claudeSettingSources) {
+    args.push('--setting-sources', config.claudeSettingSources);
+  }
 
   if (config.model) {
     args.push(config.provider === 'codex' ? '-m' : '--model', config.model);

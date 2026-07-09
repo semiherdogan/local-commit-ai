@@ -79,28 +79,39 @@
         "title": "Generate Commit Message",
         "category": "Local Commit AI CLI",
         "icon": "$(comment-add)"
+      },
+      {
+        "command": "localCommitAi.stop",
+        "title": "Stop Commit Message Generation",
+        "category": "Local Commit AI CLI",
+        "icon": "$(debug-stop)"
       }
     ],
     "menus": {
       "scm/title": [
         {
           "command": "localCommitAi.generate.sparkle",
-          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'sparkle'",
+          "when": "scmProvider == git && !localCommitAi.generating && config.localCommitAi.buttonIcon == 'sparkle'",
           "group": "navigation@1"
         },
         {
           "command": "localCommitAi.generate.hubot",
-          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'hubot'",
+          "when": "scmProvider == git && !localCommitAi.generating && config.localCommitAi.buttonIcon == 'hubot'",
           "group": "navigation@1"
         },
         {
           "command": "localCommitAi.generate.gitCommit",
-          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'gitCommit'",
+          "when": "scmProvider == git && !localCommitAi.generating && config.localCommitAi.buttonIcon == 'gitCommit'",
           "group": "navigation@1"
         },
         {
           "command": "localCommitAi.generate.commentAdd",
-          "when": "scmProvider == git && config.localCommitAi.buttonIcon == 'commentAdd'",
+          "when": "scmProvider == git && !localCommitAi.generating && config.localCommitAi.buttonIcon == 'commentAdd'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "localCommitAi.stop",
+          "when": "scmProvider == git && localCommitAi.generating",
           "group": "navigation@1"
         }
       ],
@@ -123,6 +134,10 @@
         {
           "command": "localCommitAi.generate.commentAdd",
           "when": "false"
+        },
+        {
+          "command": "localCommitAi.stop",
+          "when": "localCommitAi.generating"
         }
       ]
     },
@@ -213,8 +228,14 @@
           "default": true,
           "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
-        "localCommitAi.customCommand": {
+        "localCommitAi.claudeSettingSources": {
           "order": 11,
+          "type": "string",
+          "default": "user",
+          "description": "Claude Code --setting-sources value. Set to an empty string to omit the flag."
+        },
+        "localCommitAi.customCommand": {
+          "order": 12,
           "type": "string",
           "default": "",
           "description": "Deprecated. Use localCommitAi.command instead."

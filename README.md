@@ -13,6 +13,7 @@ Local Commit AI CLI includes presets for Codex CLI and Claude Code CLI, plus a c
 - Supports Git worktrees and repositories opened from a subfolder.
 - Prompts for a repository when multiple Git repositories are open and VS Code does not provide the clicked Source Control context.
 - Sends the diff to `codex exec`, `claude --print`, or your custom command.
+- Shows a stop action in the Source Control toolbar while generation is running.
 - Writes the generated message back to the Git commit input.
 - Supports a customizable prompt template with `{diff}` replacement.
 - Supports optional model names for built-in providers.
@@ -75,6 +76,7 @@ Only staged changes are used to generate the commit message.
 | `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
+| `localCommitAi.claudeSettingSources` | `user` | Claude Code `--setting-sources` value. Set to `""` to omit the flag. |
 | `localCommitAi.customCommand` | `""` | Deprecated. Use `localCommitAi.command` instead. |
 
 Example settings:
@@ -107,6 +109,8 @@ Minimal provider settings:
 | Custom CLI | `"localCommitAi.provider": "custom"` and `"localCommitAi.command": "your-cli"` |
 
 Only set `localCommitAi.model` if you want to override the CLI default. For Claude Code, aliases such as `sonnet` and `haiku` are supported by the CLI. For Codex CLI, use a model name supported by your Codex CLI version and account.
+
+For Claude Code, `localCommitAi.claudeSettingSources` defaults to `user` so commit message generation is isolated from project-level settings such as hooks. If your Claude Code version does not support `--setting-sources`, set this value to an empty string.
 
 If the selected CLI is installed outside the `PATH` seen by VS Code, set `localCommitAi.command` to the command name or absolute executable path:
 
