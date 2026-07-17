@@ -35,7 +35,7 @@ interface GeneratorConfig {
   provider: Provider;
   command: string;
   model: string;
-  claudeBare: boolean;
+  claudeSafeMode: boolean;
   prompt: string;
   maxDiffLines: number;
   recentCommitExampleCount: number;
@@ -340,7 +340,7 @@ function getConfig(): GeneratorConfig {
     provider,
     command: config.get<string>('command', '').trim(),
     model: config.get<string>('model', '').trim(),
-    claudeBare: config.get<boolean>('claudeBare', true),
+    claudeSafeMode: config.get<boolean>('claudeSafeMode', true),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
     recentCommitExampleCount: Math.min(
@@ -463,8 +463,8 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, toke
   const command = config.command || config.provider;
   const args = config.provider === 'codex' ? ['exec'] : ['--print'];
 
-  if (config.provider === 'claude' && config.claudeBare) {
-    args.unshift('--bare');
+  if (config.provider === 'claude' && config.claudeSafeMode) {
+    args.unshift('--safe-mode');
   }
 
   if (config.model) {
@@ -493,7 +493,32 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, toke
     config,
     timeoutMs: generationTimeoutMs,
     token
+  }).catch((error) => {
+    if (
+      config.provider !== 'claude'
+      || !config.claudeSafeMode
+      || !isUnknownOptionError(error, '--safe-mode')
+    ) {
+      throw error;
+    }
+
+    const fallbackArgs = args.filter((arg) => arg !== '--safe-mode');
+    debugLog(config, 'Claude --safe-mode is not supported. Retrying without it.');
+    debugLog(config, `Retry args: ${JSON.stringify(fallbackArgs)}`);
+
+    return runCommand(command, fallbackArgs, cwd, {
+      stdin: prompt,
+      config,
+      timeoutMs: generationTimeoutMs,
+      token
+    });
   });
+}
+
+function isUnknownOptionError(error: unknown, option: string): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return message.toLowerCase().includes('unknown option') && message.includes(option);
 }
 
 function runCustomGenerator(config: GeneratorConfig, prompt: string, cwd: string, token: vscode.CancellationToken): Promise<string> {

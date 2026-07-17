@@ -228,11 +228,11 @@
           "default": true,
           "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
-        "localCommitAi.claudeBare": {
+        "localCommitAi.claudeSafeMode": {
           "order": 11,
           "type": "boolean",
           "default": true,
-          "description": "Pass Claude Code --bare to skip hooks, skills, plugins, MCP, auto memory, and CLAUDE.md discovery."
+          "description": "Pass Claude Code --safe-mode to disable hooks and project customizations while keeping normal authentication."
         },
         "localCommitAi.customCommand": {
           "order": 12,
