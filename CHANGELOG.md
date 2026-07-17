@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-17
+
+### Changed
+
+- Switch claude code config to bare mode
+
 ## [0.7.1] - 2026-07-09
 
 ### Added
 
 - Add stop action to SCM toolbar
+
+### Changed
+
+- Update for v0.7.1
 
 ## [0.7.0] - 2026-06-24
 
@@ -187,6 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename extension to local commit ai
 - Merge pull request #1 from semiherdogan/dev
 
+[0.8.0]: https://github.com/semiherdogan/local-commit-ai/compare/v0.7.1..v0.8.0
 [0.7.1]: https://github.com/semiherdogan/local-commit-ai/compare/v0.7.0..v0.7.1
 [0.7.0]: https://github.com/semiherdogan/local-commit-ai/compare/v0.6.1..v0.7.0
 [0.6.1]: https://github.com/semiherdogan/local-commit-ai/compare/v0.6.0..v0.6.1
