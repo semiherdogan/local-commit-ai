@@ -76,7 +76,7 @@ Only staged changes are used to generate the commit message.
 | `localCommitAi.debug` | `false` | Write generation diagnostics to the **Local Commit AI CLI** output channel. |
 | `localCommitAi.customArgs` | `[]` | Arguments used when `provider` is `custom`. Use `{prompt}` to insert the generated prompt into an argument. |
 | `localCommitAi.customPromptStdin` | `true` | Send the generated prompt to stdin when `customArgs` does not include `{prompt}`. |
-| `localCommitAi.claudeSettingSources` | `user` | Claude Code `--setting-sources` value. Set to `""` to omit the flag. |
+| `localCommitAi.claudeBare` | `true` | Pass Claude Code `--bare` to skip hooks, skills, plugins, MCP, auto memory, and CLAUDE.md discovery. |
 | `localCommitAi.customCommand` | `""` | Deprecated. Use `localCommitAi.command` instead. |
 
 Example settings:
@@ -110,7 +110,7 @@ Minimal provider settings:
 
 Only set `localCommitAi.model` if you want to override the CLI default. For Claude Code, aliases such as `sonnet` and `haiku` are supported by the CLI. For Codex CLI, use a model name supported by your Codex CLI version and account.
 
-For Claude Code, `localCommitAi.claudeSettingSources` defaults to `user` so commit message generation is isolated from project-level settings such as hooks. If your Claude Code version does not support `--setting-sources`, set this value to an empty string.
+For Claude Code, `localCommitAi.claudeBare` defaults to `true` so commit message generation runs without hooks or other project discovery. If your Claude Code version does not support `--bare`, disable this setting.
 
 If the selected CLI is installed outside the `PATH` seen by VS Code, set `localCommitAi.command` to the command name or absolute executable path:
 

@@ -35,7 +35,7 @@ interface GeneratorConfig {
   provider: Provider;
   command: string;
   model: string;
-  claudeSettingSources: string;
+  claudeBare: boolean;
   prompt: string;
   maxDiffLines: number;
   recentCommitExampleCount: number;
@@ -340,7 +340,7 @@ function getConfig(): GeneratorConfig {
     provider,
     command: config.get<string>('command', '').trim(),
     model: config.get<string>('model', '').trim(),
-    claudeSettingSources: config.get<string>('claudeSettingSources', 'user').trim(),
+    claudeBare: config.get<boolean>('claudeBare', true),
     prompt: config.get<string>('prompt', '').trim(),
     maxDiffLines: Math.max(0, Math.floor(config.get<number>('maxDiffLines', 100))),
     recentCommitExampleCount: Math.min(
@@ -463,8 +463,8 @@ function runGenerator(config: GeneratorConfig, prompt: string, cwd: string, toke
   const command = config.command || config.provider;
   const args = config.provider === 'codex' ? ['exec'] : ['--print'];
 
-  if (config.provider === 'claude' && config.claudeSettingSources) {
-    args.push('--setting-sources', config.claudeSettingSources);
+  if (config.provider === 'claude' && config.claudeBare) {
+    args.unshift('--bare');
   }
 
   if (config.model) {

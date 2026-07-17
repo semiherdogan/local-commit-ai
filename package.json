@@ -228,11 +228,11 @@
           "default": true,
           "description": "Send the generated prompt to stdin when provider is custom and customArgs does not include {prompt}."
         },
-        "localCommitAi.claudeSettingSources": {
+        "localCommitAi.claudeBare": {
           "order": 11,
-          "type": "string",
-          "default": "user",
-          "description": "Claude Code --setting-sources value. Set to an empty string to omit the flag."
+          "type": "boolean",
+          "default": true,
+          "description": "Pass Claude Code --bare to skip hooks, skills, plugins, MCP, auto memory, and CLAUDE.md discovery."
         },
         "localCommitAi.customCommand": {
           "order": 12,
